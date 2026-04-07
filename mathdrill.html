@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>MathDrill</title>
+
+<!-- iOS PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MathDrill">
+<meta name="theme-color" content="#0a0a0a">
+
+<!-- PWA Manifest (inline via data URI) -->
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTWF0aERyaWxsIiwic2hvcnRfbmFtZSI6Ik1hdGhEcmlsbCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTBhIiwidGhlbWVfY29sb3IiOiIjMGEwYTBhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnPjxyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyByeD0nMjAnIGZpbGw9JyMwYTBhMGEnLz48dGV4dCB4PSc1MCcgeT0nNjgnIGZvbnQtc2l6ZT0nNTYnIHRleHQtYW5jaG9yPSdtaWRkbGUnPuKaoe+4jzwvdGV4dD48L3N2Zz4iLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
+
+<!-- Icon for iOS home screen -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0a'/><text x='50' y='68' font-size='56' text-anchor='middle'>⚡️</text></svg>">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0a0a; --surface: #111; --border: #1a1a1a; --border2: #1f1f1f;
+    --text: #e4e4e7; --muted: #71717a; --dim: #3f3f46; --dimmer: #27272a;
+    --accent: #f97316; --gold: #facc15; --red: #ef4444; --green: #4ade80;
+    --font: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg); color: var(--text); font-family: var(--font);
+    height: 100%; overflow-x: hidden; user-select: none; -webkit-user-select: none;
+  }
+
+  #app {
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: calc(20px + var(--safe-top)) 16px calc(20px + var(--safe-bottom));
+  }
+
+  .card { width: 100%; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+  /* Brand */
+  .brand-mark { font-size: 44px; line-height: 1; margin-bottom: 4px; }
+  .brand-name {
+    font-size: 32px; font-weight: 800; letter-spacing: -2px;
+    background: linear-gradient(135deg, #facc15 0%, #f97316 50%, #ef4444 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .brand-tag { color: var(--dim); font-size: 11px; letter-spacing: 0.5px; }
+
+  /* Buttons */
+  .btn-primary {
+    width: 100%; max-width: 320px; padding: 15px 0; border-radius: 14px;
+    background: linear-gradient(135deg, #facc15, #f97316);
+    color: var(--bg); font-weight: 700; font-size: 15px; border: none;
+    cursor: pointer; font-family: var(--font); letter-spacing: 0.3px;
+  }
+  .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+  .btn-ghost {
+    background: none; border: 1px solid var(--border2); color: var(--muted);
+    padding: 11px 16px; border-radius: 11px; cursor: pointer; font-size: 13px;
+    font-family: var(--font);
+  }
+  .btn-ghost:active { background: var(--surface); }
+  .btn-row { display: flex; gap: 8px; width: 100%; max-width: 320px; }
+  .btn-row > * { flex: 1; }
+
+  /* Config chips */
+  .config-row { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-bottom: 4px; }
+  .config-chip {
+    background: #141414; border: 1px solid var(--border2); border-radius: 6px;
+    padding: 3px 9px; font-size: 11px; color: var(--muted); letter-spacing: 0.5px;
+  }
+
+  /* Settings chips */
+  .chip-row { display: flex; gap: 6px; width: 100%; }
+  .chip {
+    flex: 1; padding: 11px 0; border-radius: 10px; border: 1px solid var(--border2);
+    background: var(--surface); color: var(--muted); cursor: pointer; font-size: 14px;
+    font-family: var(--font); text-align: center;
+  }
+  .chip.on { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+  .chip:active { opacity: 0.8; }
+
+  /* Range inputs */
+  .range-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; width: 100%; }
+  .range-label { width: 24px; font-size: 20px; font-weight: 700; color: #52525b; text-align: center; }
+  .range-sep { color: var(--dimmer); font-size: 12px; }
+  .range-input {
+    flex: 1; background: var(--surface); border: 1px solid var(--border2); border-radius: 8px;
+    padding: 11px 8px; color: var(--text); font-size: 15px; font-family: var(--font);
+    text-align: center; outline: none;
+  }
+  .range-input:focus { border-color: var(--accent); }
+
+  /* Section */
+  .section-title {
+    font-size: 10px; color: var(--dim); letter-spacing: 1.5px; font-weight: 600;
+    margin-top: 16px; margin-bottom: 6px; align-self: flex-start;
+  }
+
+  /* Last session */
+  .last-card {
+    width: 100%; max-width: 320px; display: flex; justify-content: space-between;
+    align-items: center; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 16px; margin-bottom: 2px;
+  }
+  .last-label { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+  .last-score { font-size: 14px; font-weight: 600; color: #a1a1aa; }
+  .last-speed { font-size: 22px; font-weight: 800; color: var(--gold); }
+  .last-speed-label { font-size: 9px; color: #52525b; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Readiness */
+  .readiness {
+    font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    border: 1px solid; border-radius: 20px; padding: 4px 14px; margin-bottom: 4px;
+  }
+
+  /* Game */
+  .prog-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: #141414; z-index: 10; }
+  .prog-fill { height: 100%; background: linear-gradient(90deg, #facc15, #f97316); transition: width 1s linear; }
+  .prog-fill.urgent { background: var(--red); }
+  .game-hud {
+    position: fixed; top: calc(12px + var(--safe-top)); left: 20px; right: 20px;
+    display: flex; justify-content: space-between; align-items: flex-start; z-index: 10;
+  }
+  .hud-timer { font-size: 20px; font-weight: 600; color: #52525b; }
+  .hud-timer.urgent { color: var(--red); }
+  .hud-score { display: flex; flex-direction: column; align-items: flex-end; }
+  .hud-score-num { font-size: 28px; font-weight: 800; color: var(--gold); line-height: 1; }
+  .hud-score-label { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+
+  .game-body { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .game-q {
+    font-size: 46px; font-weight: 800; letter-spacing: -1px;
+    background: linear-gradient(135deg, #fafafa, #a1a1aa);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .game-eq { font-size: 24px; color: var(--border2); font-weight: 300; }
+  .game-input {
+    width: 180px; text-align: center; font-size: 44px; font-weight: 700;
+    background: transparent; border: none; border-bottom: 2px solid var(--border2);
+    color: var(--text); outline: none; padding: 6px 0; font-family: var(--font);
+    caret-color: var(--accent);
+  }
+  .skip-link {
+    position: fixed; bottom: calc(36px + var(--safe-bottom));
+    background: none; border: none; color: var(--dimmer); font-size: 14px;
+    cursor: pointer; font-family: var(--font); padding: 8px 20px;
+  }
+
+  /* Countdown */
+  .countdown {
+    font-size: 96px; font-weight: 800; color: var(--gold); line-height: 1;
+    animation: countPulse 0.6s ease-in-out;
+  }
+  @keyframes countPulse { 0% { transform: scale(1.3); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
+
+  /* Result */
+  .result-score {
+    font-size: 72px; font-weight: 800; line-height: 1;
+    background: linear-gradient(135deg, #facc15, #f97316);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .result-sub { color: #52525b; font-size: 13px; margin-bottom: 8px; }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; max-width: 360px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 10px; display: flex; flex-direction: column; align-items: center;
+  }
+  .stat-value { font-size: 20px; font-weight: 700; }
+  .stat-key { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+  /* Op bars */
+  .op-breakdown { width: 100%; display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+  .op-row { display: flex; align-items: center; gap: 8px; }
+  .op-sym { width: 20px; font-size: 16px; font-weight: 700; color: var(--accent); text-align: center; }
+  .op-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .op-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+  .op-pct { width: 36px; font-size: 12px; font-weight: 600; text-align: right; color: #a1a1aa; }
+  .op-ms { width: 36px; font-size: 11px; color: var(--dim); text-align: right; }
+
+  /* Insight */
+  .insight-card {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid; border-radius: 10px; padding: 10px 12px;
+    display: flex; gap: 10px; align-items: flex-start; margin-top: 6px;
+  }
+  .insight-icon { font-size: 16px; line-height: 1.4; flex-shrink: 0; }
+  .insight-text { font-size: 12px; color: #a1a1aa; line-height: 1.5; }
+  .insight-high { border-left-color: var(--red); }
+  .insight-medium { border-left-color: var(--accent); }
+  .insight-positive { border-left-color: var(--green); }
+
+  /* Log */
+  details summary { font-size: 12px; color: var(--dim); cursor: pointer; padding: 6px 0; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+  .log-box {
+    max-height: 200px; overflow-y: auto; background: #0f0f0f; border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px; margin-top: 4px; font-size: 12px;
+  }
+  .log-item { padding: 3px 0; display: flex; justify-content: space-between; }
+  .log-ok { color: var(--green); }
+  .log-miss { color: var(--red); }
+
+  /* Progress */
+  .readiness-badge {
+    width: 100%; max-width: 360px; border: 1px solid; border-radius: 14px;
+    padding: 14px 16px; text-align: center; margin-bottom: 4px; background: var(--surface);
+  }
+  .readiness-label { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
+  .readiness-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+  .chart-box {
+    background: #0f0f0f; border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 8px 4px; margin-top: 4px; width: 100%;
+  }
+
+  .op-acc-grid { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; justify-content: center; margin: 8px 0; }
+  .op-acc-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 70px;
+  }
+
+  /* Transitions */
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+const { AreaChart, Area, LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } = Recharts;
+
+const OP = { add: "+", sub: "−", mul: "×", div: "÷" };
+const OP_NAMES = { add: "Addition", sub: "Subtraction", mul: "Multiplication", div: "Division" };
+const DURATIONS = [60, 120, 180, 300];
+const fmt = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+const rand = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const DEFAULT_CFG = {
+  duration:120, ops:{add:true,sub:true,mul:true,div:true},
+  r:{addLo:2,addHi:100,subLo:2,subHi:100,mulLo:2,mulHi:12,divLo:2,divHi:12}
+};
+
+function gen(ops,r){
+  const pool=Object.entries(ops).filter(([,v])=>v).map(([k])=>k);
+  if(!pool.length)return{text:"0+0",answer:0,op:"add"};
+  const op=pool[rand(0,pool.length-1)];let a,b,answer,text;
+  switch(op){
+    case"add":a=rand(r.addLo,r.addHi);b=rand(r.addLo,r.addHi);text=`${a} + ${b}`;answer=a+b;break;
+    case"sub":a=rand(r.subLo,r.subHi);b=rand(r.subLo,a);text=`${a} − ${b}`;answer=a-b;break;
+    case"mul":a=rand(r.mulLo,r.mulHi);b=rand(r.mulLo,r.mulHi);text=`${a} × ${b}`;answer=a*b;break;
+    case"div":b=rand(Math.max(2,r.divLo),r.divHi);answer=rand(r.divLo,r.divHi);a=b*answer;text=`${a} ÷ ${b}`;break;
+  }
+  return{text,answer,op};
+}
+
+function loadLS(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;}}
+function saveLS(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+function analyzeWeaknesses(history){
+  const last10=history.slice(-10);if(last10.length<2)return null;
+  const ops={};
+  last10.forEach(s=>{if(!s.byOp)return;Object.entries(s.byOp).forEach(([op,d])=>{
+    if(!ops[op])ops[op]={correct:0,total:0,totalMs:0,count:0};
+    ops[op].correct+=d.c;ops[op].total+=d.t;
+    if(d.avgMs){ops[op].totalMs+=d.avgMs*d.t;ops[op].count+=d.t;}
+  });});
+  const analysis=Object.entries(ops).map(([op,d])=>({op,acc:d.total?d.correct/d.total:0,avgMs:d.count?d.totalMs/d.count:0,total:d.total,correct:d.correct})).sort((a,b)=>a.acc-b.acc);
+  const weakest=analysis.filter(a=>a.acc<0.85&&a.total>=5);
+  const slowest=[...analysis].sort((a,b)=>b.avgMs-a.avgMs).filter(a=>a.avgMs>0);
+  const insights=[];
+  if(weakest.length>0){const w=weakest[0];insights.push({type:"accuracy",op:w.op,message:`${OP_NAMES[w.op]} is your weakest area at ${Math.round(w.acc*100)}% accuracy. Try drilling ${OP[w.op]} only.`,severity:w.acc<0.6?"high":"medium"});}
+  if(slowest.length>0&&slowest[0].avgMs>3000){const s=slowest[0];insights.push({type:"speed",op:s.op,message:`${OP_NAMES[s.op]} is slowest at ~${(s.avgMs/1000).toFixed(1)}s per problem. Keep drilling for pattern recognition.`,severity:s.avgMs>5000?"high":"medium"});}
+  const r3=history.slice(-3),p3=history.slice(-6,-3);
+  if(r3.length>=3&&p3.length>=3){const d=r3.reduce((a,s)=>a+s.score,0)/3-p3.reduce((a,s)=>a+s.score,0)/3;
+    if(d>3)insights.push({type:"trend",message:`Improving! +${d.toFixed(1)} avg score recently.`,severity:"positive"});
+    else if(d<-3)insights.push({type:"trend",message:`Score dipped by ${Math.abs(d).toFixed(1)}. Try shorter sessions or focus drills.`,severity:"medium"});
+  }
+  const allAcc=analysis.length?analysis.reduce((a,x)=>a+x.acc,0)/analysis.length:0;
+  let readiness="Warming Up",readinessColor="#f97316";
+  if(allAcc>0.95&&history.length>=10){readiness="Interview Ready";readinessColor="#4ade80";}
+  else if(allAcc>0.85){readiness="Getting Sharp";readinessColor="#facc15";}
+  else if(allAcc>0.7){readiness="Building Speed";readinessColor="#f97316";}
+  return{analysis,insights,readiness,readinessColor};
+}
+
+function Countdown({onDone}){
+  const[n,setN]=useState(3);
+  useEffect(()=>{if(n<=0){onDone();return;}const t=setTimeout(()=>setN(n-1),600);return()=>clearTimeout(t);},[n,onDone]);
+  return <div className="countdown" key={n}>{n||"GO"}</div>;
+}
+
+function InsightCard({insight}){
+  const icons={accuracy:"◎",speed:"⏱",trend:"↗"};
+  return(<div className={`insight-card insight-${insight.severity}`}>
+    <div className="insight-icon">{icons[insight.type]||"•"}</div>
+    <div className="insight-text">{insight.message}</div>
+  </div>);
+}
+
+function RangeInput({label,lo,hi,loK,hiK,r,onChange}){
+  return(<div className="range-row">
+    <span className="range-label">{label}</span>
+    <input type="number" inputMode="numeric" pattern="[0-9]*" value={lo} className="range-input"
+      onChange={e=>onChange({...r,[loK]:Math.max(0,+e.target.value)})}/>
+    <span className="range-sep">→</span>
+    <input type="number" inputMode="numeric" pattern="[0-9]*" value={hi} className="range-input"
+      onChange={e=>onChange({...r,[hiK]:Math.max(lo,+e.target.value)})}/>
+  </div>);
+}
+
+function ProgressView({history,onBack,onClear}){
+  const wa=useMemo(()=>analyzeWeaknesses(history),[history]);
+  if(!history.length)return(<div id="app"><div className="card">
+    <h2 style={{fontSize:20,fontWeight:700}}>Progress</h2>
+    <p style={{color:"var(--dim)",fontSize:13}}>Complete a session first.</p>
+    <button className="btn-primary" onClick={onBack}>Back</button>
+  </div></div>);
+
+  const recent=history.slice(-40);
+  const cd=recent.map((s,i)=>({i:i+1,d:new Date(s.ts).toLocaleDateString("en-US",{month:"short",day:"numeric"}),score:s.score,speed:s.duration?+(s.score/(s.duration/60)).toFixed(1):0}));
+  const best=Math.max(...recent.map(s=>s.score));
+  const avg=(recent.reduce((a,s)=>a+s.score,0)/recent.length).toFixed(1);
+  const totalP=recent.reduce((a,s)=>a+(s.total||0),0);
+  const opData=wa?.analysis?.map(a=>({name:OP[a.op],accuracy:Math.round(a.acc*100),fill:a.acc>0.9?"#4ade80":a.acc>0.75?"#facc15":"#ef4444"}))||[];
+  const ttStyle={background:"#141414",border:"1px solid #1f1f1f",borderRadius:8,fontSize:11,color:"#e4e4e7"};
+
+  return(<div className="card fade-in" style={{maxWidth:480}}>
+    <h2 style={{fontSize:20,fontWeight:700}}>Progress</h2>
+    {wa&&<div className="readiness-badge" style={{borderColor:wa.readinessColor}}>
+      <div className="readiness-label" style={{color:wa.readinessColor}}>{wa.readiness}</div>
+      <div className="readiness-sub">{history.length} sessions · {totalP} problems solved</div>
+    </div>}
+    <div className="stats-grid">
+      <div className="stat-card"><div className="stat-value">{best}</div><div className="stat-key">Best Score</div></div>
+      <div className="stat-card"><div className="stat-value">{avg}</div><div className="stat-key">Average</div></div>
+    </div>
+    {wa?.insights?.length>0&&<div style={{width:"100%"}}><div className="section-title">INSIGHTS</div>
+      {wa.insights.map((ins,i)=><InsightCard key={i} insight={ins}/>)}</div>}
+
+    <div style={{width:"100%"}}><div className="section-title">SCORE TREND</div><div className="chart-box">
+      <ResponsiveContainer width="100%" height={140}>
+        <AreaChart data={cd} margin={{top:4,right:4,bottom:0,left:-24}}>
+          <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f97316" stopOpacity={0.3}/><stop offset="100%" stopColor="#f97316" stopOpacity={0}/></linearGradient></defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a"/><XAxis dataKey="d" tick={{fill:"#3f3f46",fontSize:9}} axisLine={false} tickLine={false} interval="preserveStartEnd"/>
+          <YAxis tick={{fill:"#3f3f46",fontSize:9}} axisLine={false} tickLine={false}/><Tooltip contentStyle={ttStyle}/>
+          <Area type="monotone" dataKey="score" stroke="#f97316" strokeWidth={2} fill="url(#sg)" dot={{r:2,fill:"#f97316"}}/>
+        </AreaChart>
+      </ResponsiveContainer>
+    </div></div>
+
+    <div style={{width:"100%"}}><div className="section-title">SPEED (PER MIN)</div><div className="chart-box">
+      <ResponsiveContainer width="100%" height={120}>
+        <LineChart data={cd} margin={{top:4,right:4,bottom:0,left:-24}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a"/><XAxis dataKey="d" tick={{fill:"#3f3f46",fontSize:9}} axisLine={false} tickLine={false} interval="preserveStartEnd"/>
+          <YAxis tick={{fill:"#3f3f46",fontSize:9}} axisLine={false} tickLine={false}/><Tooltip contentStyle={ttStyle}/>
+          <Line type="monotone" dataKey="speed" stroke="#facc15" strokeWidth={2} dot={{r:2,fill:"#facc15"}}/>
+        </LineChart>
+      </ResponsiveContainer>
+    </div></div>
+
+    {opData.length>0&&<div style={{width:"100%"}}><div className="section-title">ACCURACY BY OPERATION</div><div className="chart-box">
+      <ResponsiveContainer width="100%" height={48*opData.length+20}>
+        <BarChart data={opData} layout="vertical" margin={{top:4,right:30,bottom:0,left:0}}>
+          <XAxis type="number" domain={[0,100]} tick={{fill:"#3f3f46",fontSize:9}} axisLine={false} tickLine={false}/>
+          <YAxis type="category" dataKey="name" tick={{fill:"#a1a1aa",fontSize:14,fontWeight:600}} axisLine={false} tickLine={false} width={30}/>
+          <Tooltip contentStyle={ttStyle} formatter={v=>`${v}%`}/><Bar dataKey="accuracy" radius={[0,6,6,0]} barSize={20}>
+          {opData.map((d,i)=><Cell key={i} fill={d.fill}/>)}</Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div></div>}
+
+    <button className="btn-primary" style={{marginTop:12}} onClick={onBack}>Back</button>
+    <button className="btn-ghost" style={{fontSize:11,color:"#3f3f46",borderColor:"#1a1a1a",marginTop:4}} onClick={()=>{if(confirm("Clear all progress?"))onClear();}}>Reset Progress</button>
+  </div>);
+}
+
+function App(){
+  const[view,setView]=useState("menu");
+  const[cfg,setCfg]=useState(()=>loadLS("md-c3",DEFAULT_CFG));
+  const[problem,setProblem]=useState(null);
+  const[input,setInput]=useState("");
+  const[score,setScore]=useState(0);
+  const[total,setTotal]=useState(0);
+  const[timeLeft,setTimeLeft]=useState(0);
+  const[log,setLog]=useState([]);
+  const[byOp,setByOp]=useState({});
+  const[history,setHistory]=useState(()=>loadLS("md-h3",[]));
+  const[probStart,setProbStart]=useState(0);
+  const inputRef=useRef(null);
+  const timerRef=useRef(null);
+
+  const next=useCallback(()=>{setProblem(gen(cfg.ops,cfg.r));setInput("");setProbStart(Date.now());},[cfg]);
+  const beginRound=useCallback(()=>{setScore(0);setTotal(0);setLog([]);setByOp({});setTimeLeft(cfg.duration);setView("game");next();},[cfg,next]);
+
+  const endGame=useCallback((sc,tot,bo)=>{
+    const entry={ts:Date.now(),score:sc,total:tot,duration:cfg.duration,byOp:bo};
+    setHistory(prev=>{const u=[...prev,entry].slice(-200);saveLS("md-h3",u);return u;});setView("result");
+  },[cfg.duration]);
+
+  useEffect(()=>{if(view!=="game")return;timerRef.current=setInterval(()=>{
+    setTimeLeft(t=>{if(t<=1){clearInterval(timerRef.current);
+      setScore(sc=>{setTotal(tot=>{setByOp(bo=>{setTimeout(()=>endGame(sc,tot,bo),0);return bo;});return tot;});return sc;});return 0;}return t-1;});
+  },1000);return()=>clearInterval(timerRef.current);},[view,endGame]);
+
+  useEffect(()=>{if(view==="game"&&inputRef.current)setTimeout(()=>inputRef.current?.focus(),50);},[view,problem]);
+
+  const recOp=(op,ok,ms)=>setByOp(p=>{const e=p[op]||{c:0,t:0,totalMs:0};return{...p,[op]:{c:e.c+(ok?1:0),t:e.t+1,totalMs:e.totalMs+ms,avgMs:(e.totalMs+ms)/(e.t+1)}};});
+
+  const handleInput=val=>{
+    if(val==="-"||val===""){setInput(val);return;}if(!/^-?\d+$/.test(val))return;setInput(val);
+    if(parseInt(val,10)===problem.answer){const ms=Date.now()-probStart;try{navigator.vibrate?.(15);}catch{}
+      setScore(s=>s+1);setTotal(t=>t+1);recOp(problem.op,true,ms);setLog(l=>[...l,{q:problem.text,a:problem.answer,ok:true,ms}]);next();}
+  };
+  const skip=()=>{const ms=Date.now()-probStart;setTotal(t=>t+1);recOp(problem.op,false,ms);setLog(l=>[...l,{q:problem.text,a:problem.answer,ok:false,ms}]);next();};
+
+  const pct=cfg.duration?((cfg.duration-timeLeft)/cfg.duration)*100:0;
+  const isUrgent=timeLeft<=10&&timeLeft>0;
+
+  if(view==="progress")return<ProgressView history={history} onBack={()=>setView("menu")} onClear={()=>{setHistory([]);saveLS("md-h3",[]);}}/>;
+
+  if(view==="settings")return(<div className="card fade-in" style={{alignItems:"stretch"}}>
+    <button className="btn-ghost" style={{alignSelf:"flex-start",border:"none",padding:0,color:"#52525b"}} onClick={()=>{saveLS("md-c3",cfg);setView("menu");}}>← Back</button>
+    <h2 style={{fontSize:20,fontWeight:700,textAlign:"center"}}>Settings</h2>
+    <div className="section-title">DURATION</div>
+    <div className="chip-row">{DURATIONS.map(d=><button key={d} className={`chip${cfg.duration===d?" on":""}`} onClick={()=>setCfg(c=>({...c,duration:d}))}>{fmt(d)}</button>)}</div>
+    <div className="section-title">OPERATIONS</div>
+    <div className="chip-row">{Object.keys(OP).map(op=><button key={op} className={`chip${cfg.ops[op]?" on":""}`} onClick={()=>setCfg(c=>({...c,ops:{...c.ops,[op]:!c.ops[op]}}))}>{OP[op]}</button>)}</div>
+    <div className="section-title">RANGES</div>
+    {cfg.ops.add&&<RangeInput label="+" lo={cfg.r.addLo} hi={cfg.r.addHi} loK="addLo" hiK="addHi" r={cfg.r} onChange={r=>setCfg(c=>({...c,r}))}/>}
+    {cfg.ops.sub&&<RangeInput label="−" lo={cfg.r.subLo} hi={cfg.r.subHi} loK="subLo" hiK="subHi" r={cfg.r} onChange={r=>setCfg(c=>({...c,r}))}/>}
+    {cfg.ops.mul&&<RangeInput label="×" lo={cfg.r.mulLo} hi={cfg.r.mulHi} loK="mulLo" hiK="mulHi" r={cfg.r} onChange={r=>setCfg(c=>({...c,r}))}/>}
+    {cfg.ops.div&&<RangeInput label="÷" lo={cfg.r.divLo} hi={cfg.r.divHi} loK="divLo" hiK="divHi" r={cfg.r} onChange={r=>setCfg(c=>({...c,r}))}/>}
+    <div style={{display:"flex",gap:8,marginTop:20}}>
+      <button className="btn-ghost" style={{flex:1}} onClick={()=>setCfg(DEFAULT_CFG)}>Reset</button>
+      <button className="btn-primary" style={{flex:2}} onClick={()=>{saveLS("md-c3",cfg);setView("menu");}}>Save</button>
+    </div>
+  </div>);
+
+  if(view==="countdown")return<Countdown onDone={beginRound}/>;
+
+  if(view==="result"){
+    const acc=total?Math.round(score/total*100):0;const spd=cfg.duration?(score/(cfg.duration/60)).toFixed(1):0;
+    const avgMs=log.filter(l=>l.ok).reduce((a,l)=>a+l.ms,0)/Math.max(1,log.filter(l=>l.ok).length);
+    const wa=analyzeWeaknesses(history);
+    return(<div className="card fade-in" style={{maxWidth:440}}>
+      <div className="result-score">{score}</div>
+      <div className="result-sub">correct in {fmt(cfg.duration)}</div>
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-value">{total}</div><div className="stat-key">Attempted</div></div>
+        <div className="stat-card"><div className="stat-value">{acc}%</div><div className="stat-key">Accuracy</div></div>
+        <div className="stat-card"><div className="stat-value">{spd}</div><div className="stat-key">Per Min</div></div>
+        <div className="stat-card"><div className="stat-value">{(avgMs/1000).toFixed(1)}s</div><div className="stat-key">Avg Time</div></div>
+      </div>
+      {Object.keys(byOp).length>0&&<div className="op-breakdown">
+        {Object.entries(byOp).map(([op,d])=>{const p=d.t?Math.round(d.c/d.t*100):0;const ms=d.t?(d.totalMs/d.t/1000).toFixed(1):0;
+          return<div key={op} className="op-row"><span className="op-sym">{OP[op]}</span><div className="op-bar"><div className="op-fill" style={{width:`${p}%`,background:p>90?"#4ade80":p>75?"#facc15":"#ef4444"}}/></div><span className="op-pct">{p}%</span><span className="op-ms">{ms}s</span></div>;})}
+      </div>}
+      {wa?.insights?.[0]&&<InsightCard insight={wa.insights[0]}/>}
+      {log.length>0&&<details style={{width:"100%"}}><summary>View all {log.length} problems</summary><div className="log-box">
+        {log.map((h,i)=><div key={i} className={`log-item ${h.ok?"log-ok":"log-miss"}`}><span>{h.q} = {h.a}</span><span style={{fontSize:10,opacity:0.6}}>{h.ok?`${(h.ms/1000).toFixed(1)}s`:"skipped"}</span></div>)}
+      </div></details>}
+      <button className="btn-primary" onClick={()=>setView("countdown")}>Play Again</button>
+      <button className="btn-ghost" onClick={()=>setView("menu")}>Menu</button>
+    </div>);
+  }
+
+  if(view==="game"&&problem)return(<div style={{width:"100%",display:"flex",flexDirection:"column",alignItems:"center"}} onClick={()=>inputRef.current?.focus()}>
+    <div className="prog-bar"><div className={`prog-fill${isUrgent?" urgent":""}`} style={{width:`${pct}%`}}/></div>
+    <div className="game-hud"><span className={`hud-timer${isUrgent?" urgent":""}`}>{fmt(timeLeft)}</span><div className="hud-score"><span className="hud-score-num">{score}</span><span className="hud-score-label">correct</span></div></div>
+    <div className="game-body"><div className="game-q">{problem.text}</div><div className="game-eq">=</div>
+      <input ref={inputRef} inputMode="numeric" pattern="[0-9]*" value={input} onChange={e=>handleInput(e.target.value)} className="game-input" autoFocus autoComplete="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"/>
+    </div><button className="skip-link" onClick={skip}>skip →</button>
+  </div>);
+
+  // Menu
+  const wa=analyzeWeaknesses(history);
+  const last=history.length?history[history.length-1]:null;
+  return(<div className="card fade-in">
+    <div style={{display:"flex",flexDirection:"column",alignItems:"center",marginBottom:8}}>
+      <div className="brand-mark">⚡</div>
+      <div className="brand-name">MathDrill</div>
+      <div className="brand-tag">Quant interview mental math trainer</div>
+    </div>
+    <div className="config-row">{Object.entries(cfg.ops).filter(([,v])=>v).map(([op])=><span key={op} className="config-chip">{OP[op]}</span>)}<span className="config-chip">{fmt(cfg.duration)}</span></div>
+    {last&&<div className="last-card"><div><div className="last-label">Last Session</div><div className="last-score">{last.score} correct</div></div><div style={{display:"flex",flexDirection:"column",alignItems:"flex-end"}}><div className="last-speed">{(last.score/(last.duration/60)).toFixed(1)}</div><div className="last-speed-label">per min</div></div></div>}
+    {wa&&<div className="readiness" style={{color:wa.readinessColor,borderColor:wa.readinessColor+"33"}}>{wa.readiness}</div>}
+    <button className="btn-primary" onClick={()=>setView("countdown")}>Start Drill</button>
+    <div className="btn-row"><button className="btn-ghost" onClick={()=>setView("settings")}>Settings</button><button className="btn-ghost" onClick={()=>setView("progress")}>Progress</button></div>
+  </div>);
+}
+
+ReactDOM.createRoot(document.getElementById("app")).render(<App/>);
+</script>
+</body>
+</html>
