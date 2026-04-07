@@ -16,7 +16,7 @@
 :root{
   --bg:#0a0a0a;--s:#111;--b:#1a1a1a;--b2:#1f1f1f;--t:#e4e4e7;
   --m:#71717a;--d:#3f3f46;--dm:#27272a;--acc:#f97316;--gold:#facc15;
-  --red:#ef4444;--grn:#4ade80;
+  --red:#ef4444;--grn:#4ade80;--cyan:#22d3ee;
   --f:'JetBrains Mono','SF Mono','Menlo','Courier New',monospace;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
@@ -24,17 +24,13 @@
 html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;overflow-x:hidden;user-select:none;-webkit-user-select:none}
 #app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(20px + var(--st)) 16px calc(20px + var(--sb))}
 .hide{display:none!important}
-
-/* Card */
 .card{width:100%;max-width:400px;display:flex;flex-direction:column;align-items:center;gap:10px;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* Brand */
 .brand-mark{font-size:44px;line-height:1;margin-bottom:4px}
 .brand-name{font-size:32px;font-weight:800;letter-spacing:-2px;background:linear-gradient(135deg,#facc15 0%,#f97316 50%,#ef4444 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .brand-tag{color:var(--d);font-size:11px;letter-spacing:.5px}
 
-/* Buttons */
 .btn-p{width:100%;max-width:320px;padding:15px 0;border-radius:14px;background:linear-gradient(135deg,#facc15,#f97316);color:var(--bg);font-weight:700;font-size:15px;border:none;cursor:pointer;font-family:var(--f);letter-spacing:.3px}
 .btn-p:active{opacity:.85;transform:scale(.98)}
 .btn-g{background:none;border:1px solid var(--b2);color:var(--m);padding:11px 16px;border-radius:11px;cursor:pointer;font-size:13px;font-family:var(--f)}
@@ -42,33 +38,29 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 .btn-row{display:flex;gap:8px;width:100%;max-width:320px}
 .btn-row>*{flex:1}
 
-/* Config chips */
 .cfg-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:4px}
 .cfg-chip{background:#141414;border:1px solid var(--b2);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--m);letter-spacing:.5px}
+.cfg-chip.adv{color:var(--cyan);border-color:#164e63}
 
-/* Last session */
 .last-card{width:100%;max-width:320px;display:flex;justify-content:space-between;align-items:center;background:var(--s);border:1px solid var(--b);border-radius:12px;padding:12px 16px;margin-bottom:2px}
-
-/* Readiness pill */
 .readiness{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;border:1px solid;border-radius:20px;padding:4px 14px;margin-bottom:4px}
 
-/* Settings */
 .s-title{font-size:10px;color:var(--d);letter-spacing:1.5px;font-weight:600;margin-top:16px;margin-bottom:6px;align-self:flex-start}
-.chip-row{display:flex;gap:6px;width:100%}
-.chip{flex:1;padding:11px 0;border-radius:10px;border:1px solid var(--b2);background:var(--s);color:var(--m);cursor:pointer;font-size:14px;font-family:var(--f);text-align:center}
+.chip-row{display:flex;gap:6px;width:100%;flex-wrap:wrap}
+.chip{flex:1;min-width:0;padding:10px 4px;border-radius:10px;border:1px solid var(--b2);background:var(--s);color:var(--m);cursor:pointer;font-size:13px;font-family:var(--f);text-align:center;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.3}
 .chip.on{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:700}
+.chip.adv-on{background:#0e7490;color:#ecfeff;border-color:#0e7490;font-weight:700}
 .chip:active{opacity:.8}
+.chip-label{font-size:9px;opacity:.7;font-weight:400}
 .range-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;width:100%}
-.range-label{width:24px;font-size:20px;font-weight:700;color:#52525b;text-align:center}
+.range-label{width:24px;font-size:20px;font-weight:700;color:#52525b;text-align:center;flex-shrink:0}
 .range-sep{color:var(--dm);font-size:12px}
-.range-input{flex:1;background:var(--s);border:1px solid var(--b2);border-radius:8px;padding:11px 8px;color:var(--t);font-size:15px;font-family:var(--f);text-align:center;outline:none}
+.range-input{flex:1;background:var(--s);border:1px solid var(--b2);border-radius:8px;padding:11px 8px;color:var(--t);font-size:15px;font-family:var(--f);text-align:center;outline:none;min-width:0}
 .range-input:focus{border-color:var(--acc)}
 
-/* Countdown */
 .countdown-num{font-size:96px;font-weight:800;color:var(--gold);line-height:1;animation:cpulse .6s ease-in-out}
 @keyframes cpulse{0%{transform:scale(1.3);opacity:.5}100%{transform:scale(1);opacity:1}}
 
-/* Game */
 .prog-bar{position:fixed;top:0;left:0;right:0;height:3px;background:#141414;z-index:10}
 .prog-fill{height:100%;background:linear-gradient(90deg,#facc15,#f97316);transition:width 1s linear}
 .prog-fill.urgent{background:var(--red)}
@@ -78,50 +70,40 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 .hud-score-num{font-size:28px;font-weight:800;color:var(--gold);line-height:1}
 .hud-score-label{font-size:9px;color:var(--d);text-transform:uppercase;letter-spacing:1px}
 .game-body{display:flex;flex-direction:column;align-items:center;gap:6px}
-.game-q{font-size:46px;font-weight:800;letter-spacing:-1px;background:linear-gradient(135deg,#fafafa,#a1a1aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.game-q{font-size:40px;font-weight:800;letter-spacing:-1px;background:linear-gradient(135deg,#fafafa,#a1a1aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;padding:0 8px;word-break:break-word}
 .game-eq{font-size:24px;color:var(--b2);font-weight:300}
-.game-input{width:180px;text-align:center;font-size:44px;font-weight:700;background:transparent;border:none;border-bottom:2px solid var(--b2);color:var(--t);outline:none;padding:6px 0;font-family:var(--f);caret-color:var(--acc)}
+.game-input{width:200px;text-align:center;font-size:40px;font-weight:700;background:transparent;border:none;border-bottom:2px solid var(--b2);color:var(--t);outline:none;padding:6px 0;font-family:var(--f);caret-color:var(--acc)}
 .skip-link{position:fixed;bottom:calc(36px + var(--sb));background:none;border:none;color:var(--dm);font-size:14px;cursor:pointer;font-family:var(--f);padding:8px 20px}
 
-/* Result */
 .result-score{font-size:72px;font-weight:800;line-height:1;background:linear-gradient(135deg,#facc15,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .result-sub{color:#52525b;font-size:13px;margin-bottom:8px}
-
-/* Stats */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:360px}
 .stat-card{background:var(--s);border:1px solid var(--b);border-radius:12px;padding:12px 10px;display:flex;flex-direction:column;align-items:center}
 .stat-val{font-size:20px;font-weight:700}
 .stat-key{font-size:9px;color:var(--d);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
 
-/* Op bars */
 .op-rows{width:100%;display:flex;flex-direction:column;gap:6px;margin:8px 0}
 .op-row{display:flex;align-items:center;gap:8px}
-.op-sym{width:20px;font-size:16px;font-weight:700;color:var(--acc);text-align:center}
+.op-sym{width:28px;font-size:13px;font-weight:700;color:var(--acc);text-align:center;flex-shrink:0}
 .op-bar{flex:1;height:6px;background:var(--b);border-radius:3px;overflow:hidden}
 .op-fill{height:100%;border-radius:3px;transition:width .4s ease}
 .op-pct{width:36px;font-size:12px;font-weight:600;text-align:right;color:#a1a1aa}
 .op-ms{width:36px;font-size:11px;color:var(--d);text-align:right}
 
-/* Insights */
 .insight{width:100%;background:var(--s);border:1px solid var(--b);border-left:3px solid var(--acc);border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;margin-top:6px}
-.insight.high{border-left-color:var(--red)}.insight.positive{border-left-color:var(--grn)}
+.insight.high{border-left-color:var(--red)}.insight.positive{border-left-color:var(--grn)}.insight.medium{border-left-color:var(--acc)}
 .insight-icon{font-size:16px;line-height:1.4;flex-shrink:0}
 .insight-text{font-size:12px;color:#a1a1aa;line-height:1.5}
 
-/* Log */
 .log-toggle{font-size:12px;color:var(--d);cursor:pointer;padding:6px 0;width:100%;text-align:left;background:none;border:none;font-family:var(--f)}
 .log-box{max-height:200px;overflow-y:auto;background:#0f0f0f;border:1px solid var(--b);border-radius:10px;padding:10px;margin-top:4px;font-size:12px;width:100%}
 .log-item{padding:3px 0;display:flex;justify-content:space-between}
 
-/* Progress */
 .rb{width:100%;max-width:360px;border:1px solid;border-radius:14px;padding:14px 16px;text-align:center;margin-bottom:4px;background:var(--s)}
 .rb-label{font-size:16px;font-weight:700;letter-spacing:.5px}
 .rb-sub{font-size:11px;color:var(--d);margin-top:2px}
-
-/* SVG Chart */
 .chart-box{background:#0f0f0f;border:1px solid var(--b);border-radius:12px;padding:16px 12px 8px;margin-top:4px;width:100%;overflow:hidden}
 .chart-box svg{width:100%;display:block}
-
 .section{width:100%;margin-top:4px}
 </style>
 </head>
@@ -130,15 +112,29 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 <script>
 "use strict";
 
-// ─── State ───
-const OP={add:"+",sub:"−",mul:"×",div:"÷"};
-const OPN={add:"Addition",sub:"Subtraction",mul:"Multiplication",div:"Division"};
+// ─── Operations ───
+const ALL_OPS={
+  add:{sym:"+",name:"Addition",cat:"int"},
+  sub:{sym:"−",name:"Subtraction",cat:"int"},
+  mul:{sym:"×",name:"Multiplication",cat:"int"},
+  div:{sym:"÷",name:"Division",cat:"int"},
+  decAdd:{sym:".+",name:"Dec Add/Sub",cat:"adv"},
+  decMul:{sym:".×",name:"Dec Mul/Div",cat:"adv"},
+  pct:{sym:"%",name:"Percentage",cat:"adv"},
+  frac:{sym:"⅓",name:"Fractions",cat:"adv"},
+};
+const OP_SYM=k=>ALL_OPS[k]?.sym||k;
+const OP_NAME=k=>ALL_OPS[k]?.name||k;
 const DURS=[60,120,180,300];
-const DEF={duration:120,ops:{add:true,sub:true,mul:true,div:true},r:{addLo:2,addHi:100,subLo:2,subHi:100,mulLo:2,mulHi:12,divLo:2,divHi:12}};
+const DEF={
+  duration:120,
+  ops:{add:true,sub:true,mul:true,div:true,decAdd:false,decMul:false,pct:false,frac:false},
+  r:{addLo:2,addHi:100,subLo:2,subHi:100,mulLo:2,mulHi:12,divLo:2,divHi:12}
+};
 
-let cfg=loadLS("md4-c",DEF);
+let cfg=loadLS("md5-c",DEF);
 cfg={...DEF,...cfg,ops:{...DEF.ops,...(cfg.ops||{})},r:{...DEF.r,...(cfg.r||{})}};
-let hist=loadLS("md4-h",[]);
+let hist=loadLS("md5-h",[]);
 let view="menu",problem=null,input="",score=0,total=0,timeLeft=0;
 let log=[],byOp={},probStart=0,timerId=null,logOpen=false;
 
@@ -146,18 +142,133 @@ function loadLS(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v)
 function saveLS(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+const round2=n=>Math.round(n*100)/100;
+const pick=arr=>arr[rand(0,arr.length-1)];
+
+// ─── Problem Generation ───
+// Common fractions for mental math
+const FRACS=[
+  [1,2,.5],[1,3,.3333],[2,3,.6667],[1,4,.25],[3,4,.75],
+  [1,5,.2],[2,5,.4],[3,5,.6],[4,5,.8],
+  [1,6,.1667],[5,6,.8333],[1,8,.125],[3,8,.375],[5,8,.625],[7,8,.875],
+  [1,10,.1],[3,10,.3],[7,10,.7],[9,10,.9],
+  [1,12,.0833],[5,12,.4167],[7,12,.5833],[11,12,.9167],
+];
 
 function gen(){
   const pool=Object.entries(cfg.ops).filter(([,v])=>v).map(([k])=>k);
-  if(!pool.length)return{text:"0 + 0",answer:0,op:"add"};
-  const op=pool[rand(0,pool.length-1)];const r=cfg.r;let a,b,answer,text;
+  if(!pool.length)return{text:"0 + 0",answer:0,op:"add",dec:false};
+  const op=pick(pool);const r=cfg.r;
+  let a,b,answer,text,dec=false;
+
   switch(op){
-    case"add":a=rand(r.addLo,r.addHi);b=rand(r.addLo,r.addHi);text=`${a} + ${b}`;answer=a+b;break;
-    case"sub":a=rand(r.subLo,r.subHi);b=rand(r.subLo,a);text=`${a} − ${b}`;answer=a-b;break;
-    case"mul":a=rand(r.mulLo,r.mulHi);b=rand(r.mulLo,r.mulHi);text=`${a} × ${b}`;answer=a*b;break;
-    case"div":b=rand(Math.max(2,r.divLo),r.divHi);answer=rand(r.divLo,r.divHi);a=b*answer;text=`${a} ÷ ${b}`;break;
+    case"add":
+      a=rand(r.addLo,r.addHi);b=rand(r.addLo,r.addHi);
+      text=`${a} + ${b}`;answer=a+b;break;
+    case"sub":
+      a=rand(r.subLo,r.subHi);b=rand(r.subLo,a);
+      text=`${a} − ${b}`;answer=a-b;break;
+    case"mul":
+      a=rand(r.mulLo,r.mulHi);b=rand(r.mulLo,r.mulHi);
+      text=`${a} × ${b}`;answer=a*b;break;
+    case"div":
+      b=rand(Math.max(2,r.divLo),r.divHi);answer=rand(r.divLo,r.divHi);
+      a=b*answer;text=`${a} ÷ ${b}`;break;
+
+    // ─── Decimal Add/Sub ───
+    case"decAdd":{
+      dec=true;
+      const doSub=Math.random()<.5;
+      // 1 decimal place, numbers 1.0-99.9
+      a=round2(rand(10,999)/10); b=round2(rand(10,999)/10);
+      if(doSub&&b>a)[a,b]=[b,a];
+      if(doSub){text=`${a} − ${b}`;answer=round2(a-b)}
+      else{text=`${a} + ${b}`;answer=round2(a+b)}
+      break;
+    }
+
+    // ─── Decimal Mul/Div ───
+    case"decMul":{
+      dec=true;
+      const doDiv=Math.random()<.5;
+      if(doDiv){
+        // e.g. 14.4 ÷ 1.2 = 12
+        b=round2(rand(12,99)/10); // 1.2 - 9.9
+        answer=rand(2,30);
+        a=round2(b*answer);
+        text=`${a} ÷ ${b}`;
+      }else{
+        // e.g. 3.5 × 1.4
+        a=round2(rand(11,99)/10);b=round2(rand(11,99)/10);
+        answer=round2(a*b);
+        text=`${a} × ${b}`;
+      }
+      break;
+    }
+
+    // ─── Percentage ───
+    case"pct":{
+      dec=true;
+      const pcts=[5,10,12.5,15,20,25,30,33.33,40,50,60,66.67,75,80,90];
+      const p=pick(pcts);
+      const base=pick([20,25,30,40,50,60,75,80,100,120,150,200,250,300,400,500,800,1000]);
+      answer=round2(p*base/100);
+      text=`${p}% of ${base}`;
+      break;
+    }
+
+    // ─── Fractions ───
+    case"frac":{
+      dec=true;
+      const mode=rand(0,2);
+      if(mode===0){
+        // fraction → decimal: "3/8 = ?"
+        const f=pick(FRACS);
+        text=`${f[0]}/${f[1]} = ?`;
+        answer=round2(f[2]);
+      }else if(mode===1){
+        // fraction of number: "3/4 of 80"
+        const f=pick(FRACS.filter(f=>f[2]*100%1<0.01||[.25,.5,.75,.2,.4,.6,.8,.1,.125,.375,.625,.875].includes(f[2])));
+        const bases=[12,16,20,24,25,30,32,36,40,48,50,60,64,72,80,96,100,120,150,200];
+        const base=pick(bases);
+        answer=round2(f[2]*base);
+        text=`${f[0]}/${f[1]} of ${base}`;
+      }else{
+        // mixed: "2 × 3/4"  or "fraction + whole"
+        const f=pick(FRACS);
+        const n=rand(2,12);
+        answer=round2(n*f[2]);
+        text=`${n} × ${f[0]}/${f[1]}`;
+      }
+      break;
+    }
+
+    default:text="0+0";answer=0;
   }
-  return{text,answer,op};
+  return{text,answer,op,dec};
+}
+
+// ─── Answer comparison ───
+function checkAnswer(userVal, correct, isDec){
+  if(isDec){
+    // Accept answers rounded to reasonable precision
+    const u=parseFloat(userVal);
+    if(isNaN(u))return false;
+    // Allow within 0.015 tolerance for rounding
+    return Math.abs(u-correct)<0.015;
+  }
+  return parseInt(userVal,10)===correct;
+}
+
+// Format answer for display
+function fmtAns(answer,isDec){
+  if(isDec){
+    // Show clean decimal
+    const s=answer.toString();
+    if(s.includes(".")&&s.split(".")[1].length>4)return answer.toFixed(4).replace(/0+$/,"").replace(/\.$/,"");
+    return s;
+  }
+  return answer.toString();
 }
 
 // ─── Analysis ───
@@ -171,13 +282,13 @@ function analyze(){
   const analysis=Object.entries(ops).map(([op,d])=>({op,acc:d.t?d.c/d.t:0,avgMs:d.n?d.ms/d.n:0,t:d.t,c:d.c})).sort((a,b)=>a.acc-b.acc);
   const insights=[];
   const weak=analysis.filter(a=>a.acc<.85&&a.t>=5);
-  if(weak.length){const w=weak[0];insights.push({type:"accuracy",sev:w.acc<.6?"high":"medium",msg:`${OPN[w.op]} is your weakest at ${Math.round(w.acc*100)}% accuracy. Try drilling ${OP[w.op]} only for focused practice.`})}
+  if(weak.length){const w=weak[0];insights.push({type:"accuracy",sev:w.acc<.6?"high":"medium",msg:`${OP_NAME(w.op)} is your weakest at ${Math.round(w.acc*100)}% accuracy. Focus your drills here.`})}
   const slow=[...analysis].sort((a,b)=>b.avgMs-a.avgMs).filter(a=>a.avgMs>3000);
-  if(slow.length){const s=slow[0];insights.push({type:"speed",sev:s.avgMs>5000?"high":"medium",msg:`${OPN[s.op]} is slowest at ~${(s.avgMs/1000).toFixed(1)}s per problem. Speed builds with pattern recognition.`})}
+  if(slow.length){const s=slow[0];insights.push({type:"speed",sev:s.avgMs>5000?"high":"medium",msg:`${OP_NAME(s.op)} is slowest at ~${(s.avgMs/1000).toFixed(1)}s per problem.`})}
   const r3=hist.slice(-3),p3=hist.slice(-6,-3);
   if(r3.length>=3&&p3.length>=3){const d=r3.reduce((a,s)=>a+s.score,0)/3-p3.reduce((a,s)=>a+s.score,0)/3;
-    if(d>3)insights.push({type:"trend",sev:"positive",msg:`Improving! +${d.toFixed(1)} avg score over recent sessions.`});
-    else if(d<-3)insights.push({type:"trend",sev:"medium",msg:`Score dipped by ${Math.abs(d).toFixed(1)}. Try shorter sessions or focus drills.`})
+    if(d>3)insights.push({type:"trend",sev:"positive",msg:`Improving! +${d.toFixed(1)} avg score recently.`});
+    else if(d<-3)insights.push({type:"trend",sev:"medium",msg:`Score dipped by ${Math.abs(d).toFixed(1)}. Try shorter or focused sessions.`})
   }
   const allAcc=analysis.length?analysis.reduce((a,x)=>a+x.acc,0)/analysis.length:0;
   let rd="Warming Up",rc="#f97316";
@@ -187,89 +298,45 @@ function analyze(){
   return{analysis,insights,rd,rc};
 }
 
-// ─── SVG Chart ───
+// ─── Has any decimal ops enabled ───
+function hasDecOps(){return cfg.ops.decAdd||cfg.ops.decMul||cfg.ops.pct||cfg.ops.frac}
+
+// ─── SVG Charts ───
 function svgChart(data,key,color,h=130){
   if(!data.length)return"";
   const w=320,pad=30,gw=w-pad*2,gh=h-30;
-  const vals=data.map(d=>d[key]);
-  const mn=Math.min(...vals),mx=Math.max(...vals)||1;
-  const range=mx-mn||1;
-  const pts=data.map((d,i)=>{
-    const x=pad+(i/(data.length-1||1))*gw;
-    const y=h-15-(((d[key]-mn)/range)*gh);
-    return{x,y};
-  });
+  const vals=data.map(d=>d[key]);const mn=Math.min(...vals),mx=Math.max(...vals)||1;const range=mx-mn||1;
+  const pts=data.map((d,i)=>({x:pad+(i/(data.length-1||1))*gw,y:h-15-(((d[key]-mn)/range)*gh)}));
   const pathD=pts.map((p,i)=>i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`).join(" ");
   const areaD=pathD+` L${pts[pts.length-1].x},${h-15} L${pts[0].x},${h-15} Z`;
-  // x labels
   const labels=data.length<=8?data:data.filter((_,i)=>i===0||i===data.length-1||i===Math.floor(data.length/2));
-  const labelHtml=labels.map(d=>{
-    const i=data.indexOf(d);const x=pad+(i/(data.length-1||1))*gw;
-    return`<text x="${x}" y="${h}" fill="#3f3f46" font-size="9" text-anchor="middle" font-family="var(--f)">${d.label||""}</text>`;
-  }).join("");
-  // y axis
-  const yLabels=[mn,mn+(mx-mn)/2,mx].map(v=>{
-    const y=h-15-(((v-mn)/range)*gh);
-    return`<text x="${pad-4}" y="${y+3}" fill="#3f3f46" font-size="9" text-anchor="end" font-family="var(--f)">${Math.round(v)}</text>
-    <line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="#1a1a1a" stroke-dasharray="3,3"/>`;
-  }).join("");
-  return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-    ${yLabels}${labelHtml}
-    <path d="${areaD}" fill="${color}" fill-opacity="0.15"/>
-    <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    ${pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3" fill="${color}"/>`).join("")}
-  </svg>`;
+  const lh=labels.map(d=>{const i=data.indexOf(d);const x=pad+(i/(data.length-1||1))*gw;return`<text x="${x}" y="${h}" fill="#3f3f46" font-size="9" text-anchor="middle" font-family="var(--f)">${d.label||""}</text>`}).join("");
+  const yL=[mn,mn+(mx-mn)/2,mx].map(v=>{const y=h-15-(((v-mn)/range)*gh);return`<text x="${pad-4}" y="${y+3}" fill="#3f3f46" font-size="9" text-anchor="end" font-family="var(--f)">${Math.round(v*10)/10}</text><line x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}" stroke="#1a1a1a" stroke-dasharray="3,3"/>`}).join("");
+  return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${yL}${lh}<path d="${areaD}" fill="${color}" fill-opacity="0.15"/><path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3" fill="${color}"/>`).join("")}</svg>`;
 }
-
 function opBarsSvg(analysis){
   const h=analysis.length*36+8,w=320;
-  return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
-    ${analysis.map((a,i)=>{
-      const y=i*36+4;const pct=Math.round(a.acc*100);
-      const color=pct>90?"#4ade80":pct>75?"#facc15":"#ef4444";
-      const bw=(pct/100)*(w-80);
-      return`<text x="10" y="${y+20}" fill="#a1a1aa" font-size="15" font-weight="700" font-family="var(--f)">${OP[a.op]}</text>
-        <rect x="36" y="${y+8}" width="${w-80}" height="14" rx="4" fill="#1a1a1a"/>
-        <rect x="36" y="${y+8}" width="${bw}" height="14" rx="4" fill="${color}"/>
-        <text x="${w-30}" y="${y+20}" fill="#a1a1aa" font-size="12" font-weight="600" text-anchor="end" font-family="var(--f)">${pct}%</text>`;
-    }).join("")}
-  </svg>`;
+  return`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">${analysis.map((a,i)=>{
+    const y=i*36+4;const pct=Math.round(a.acc*100);const color=pct>90?"#4ade80":pct>75?"#facc15":"#ef4444";const bw=(pct/100)*(w-90);
+    return`<text x="10" y="${y+20}" fill="#a1a1aa" font-size="12" font-weight="700" font-family="var(--f)">${OP_SYM(a.op)}</text><rect x="42" y="${y+8}" width="${w-90}" height="14" rx="4" fill="#1a1a1a"/><rect x="42" y="${y+8}" width="${bw}" height="14" rx="4" fill="${color}"/><text x="${w-30}" y="${y+20}" fill="#a1a1aa" font-size="12" font-weight="600" text-anchor="end" font-family="var(--f)">${pct}%</text>`}).join("")}</svg>`;
 }
 
 // ─── Render ───
 const $=id=>document.getElementById(id);
 const app=$("app");
-
-function render(){
-  switch(view){
-    case"menu":renderMenu();break;
-    case"settings":renderSettings();break;
-    case"countdown":renderCountdown();break;
-    case"game":renderGame();break;
-    case"result":renderResult();break;
-    case"progress":renderProgress();break;
-  }
-}
+function render(){({menu:renderMenu,settings:renderSettings,countdown:renderCountdown,game:renderGame,result:renderResult,progress:renderProgress})[view]()}
 
 function renderMenu(){
   const wa=analyze();const last=hist.length?hist[hist.length-1]:null;
-  const opsHtml=Object.entries(cfg.ops).filter(([,v])=>v).map(([op])=>`<span class="cfg-chip">${OP[op]}</span>`).join("");
+  const intOps=Object.entries(cfg.ops).filter(([k,v])=>v&&ALL_OPS[k]?.cat==="int").map(([k])=>`<span class="cfg-chip">${OP_SYM(k)}</span>`).join("");
+  const advOps=Object.entries(cfg.ops).filter(([k,v])=>v&&ALL_OPS[k]?.cat==="adv").map(([k])=>`<span class="cfg-chip adv">${OP_SYM(k)}</span>`).join("");
   let lastHtml="";
-  if(last){
-    const spd=(last.score/(last.duration/60)).toFixed(1);
-    lastHtml=`<div class="last-card"><div><div style="font-size:10px;color:var(--d);text-transform:uppercase;letter-spacing:1px">Last Session</div><div style="font-size:14px;font-weight:600;color:#a1a1aa">${last.score} correct</div></div><div style="display:flex;flex-direction:column;align-items:flex-end"><div style="font-size:22px;font-weight:800;color:var(--gold)">${spd}</div><div style="font-size:9px;color:#52525b;text-transform:uppercase;letter-spacing:1px">per min</div></div></div>`;
-  }
-  let rdHtml="";
-  if(wa)rdHtml=`<div class="readiness" style="color:${wa.rc};border-color:${wa.rc}33">${wa.rd}</div>`;
-
+  if(last){const spd=(last.score/(last.duration/60)).toFixed(1);lastHtml=`<div class="last-card"><div><div style="font-size:10px;color:var(--d);text-transform:uppercase;letter-spacing:1px">Last Session</div><div style="font-size:14px;font-weight:600;color:#a1a1aa">${last.score} correct</div></div><div style="display:flex;flex-direction:column;align-items:flex-end"><div style="font-size:22px;font-weight:800;color:var(--gold)">${spd}</div><div style="font-size:9px;color:#52525b;text-transform:uppercase;letter-spacing:1px">per min</div></div></div>`}
+  let rdH="";if(wa)rdH=`<div class="readiness" style="color:${wa.rc};border-color:${wa.rc}33">${wa.rd}</div>`;
   app.innerHTML=`<div class="card">
-    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:8px">
-      <div class="brand-mark">⚡</div>
-      <div class="brand-name">MathDrill</div>
-      <div class="brand-tag">Quant interview mental math trainer</div>
-    </div>
-    <div class="cfg-row">${opsHtml}<span class="cfg-chip">${fmt(cfg.duration)}</span></div>
-    ${lastHtml}${rdHtml}
+    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:8px"><div class="brand-mark">⚡</div><div class="brand-name">MathDrill</div><div class="brand-tag">Quant interview mental math trainer</div></div>
+    <div class="cfg-row">${intOps}${advOps}<span class="cfg-chip">${fmt(cfg.duration)}</span></div>
+    ${lastHtml}${rdH}
     <button class="btn-p" id="startBtn">Start Drill</button>
     <div class="btn-row"><button class="btn-g" id="setBtn">Settings</button><button class="btn-g" id="progBtn">Progress</button></div>
   </div>`;
@@ -279,48 +346,47 @@ function renderMenu(){
 }
 
 function renderSettings(){
-  const durChips=DURS.map(d=>`<button class="chip${cfg.duration===d?" on":""}" data-dur="${d}">${fmt(d)}</button>`).join("");
-  const opChips=Object.keys(OP).map(op=>`<button class="chip${cfg.ops[op]?" on":""}" data-op="${op}">${OP[op]}</button>`).join("");
+  const durC=DURS.map(d=>`<button class="chip${cfg.duration===d?" on":""}" data-dur="${d}">${fmt(d)}</button>`).join("");
 
-  function rr(label,loK,hiK){
-    if(!cfg.ops[{"+":"add","−":"sub","×":"mul","÷":"div"}[label]])return"";
+  const intOps=["add","sub","mul","div"].map(op=>`<button class="chip${cfg.ops[op]?" on":""}" data-op="${op}"><span>${ALL_OPS[op].sym}</span><span class="chip-label">${ALL_OPS[op].name}</span></button>`).join("");
+  const advOps=["decAdd","decMul","pct","frac"].map(op=>`<button class="chip${cfg.ops[op]?" adv-on":""}" data-op="${op}"><span>${ALL_OPS[op].sym}</span><span class="chip-label">${ALL_OPS[op].name}</span></button>`).join("");
+
+  function rr(label,loK,hiK,opKey){
+    if(!cfg.ops[opKey])return"";
     return`<div class="range-row"><span class="range-label">${label}</span><input type="number" inputmode="numeric" pattern="[0-9]*" class="range-input" data-rk="${loK}" value="${cfg.r[loK]}"><span class="range-sep">→</span><input type="number" inputmode="numeric" pattern="[0-9]*" class="range-input" data-rk="${hiK}" value="${cfg.r[hiK]}"></div>`;
   }
 
   app.innerHTML=`<div class="card" style="align-items:stretch">
     <button class="btn-g" style="align-self:flex-start;border:none;padding:0;color:#52525b" id="backBtn">← Back</button>
     <h2 style="font-size:20px;font-weight:700;text-align:center">Settings</h2>
-    <div class="s-title">DURATION</div><div class="chip-row" id="durRow">${durChips}</div>
-    <div class="s-title">OPERATIONS</div><div class="chip-row" id="opRow">${opChips}</div>
-    <div class="s-title">RANGES</div>
-    <div id="rangeArea">${rr("+","addLo","addHi")}${rr("−","subLo","subHi")}${rr("×","mulLo","mulHi")}${rr("÷","divLo","divHi")}</div>
+    <div class="s-title">DURATION</div><div class="chip-row" id="durRow">${durC}</div>
+    <div class="s-title">INTEGER OPERATIONS</div><div class="chip-row" id="intOpRow">${intOps}</div>
+    <div class="s-title" style="color:var(--cyan)">ADVANCED · OPTIVER / AKUNA</div><div class="chip-row" id="advOpRow">${advOps}</div>
+    <div class="s-title">INTEGER RANGES</div>
+    <div id="rangeArea">${rr("+","addLo","addHi","add")}${rr("−","subLo","subHi","sub")}${rr("×","mulLo","mulHi","mul")}${rr("÷","divLo","divHi","div")}</div>
     <div style="display:flex;gap:8px;margin-top:20px"><button class="btn-g" style="flex:1" id="resetBtn">Reset</button><button class="btn-p" style="flex:2" id="saveBtn">Save</button></div>
   </div>`;
 
-  $("durRow").onclick=e=>{const d=e.target.dataset.dur;if(d){cfg.duration=+d;render()}};
-  $("opRow").onclick=e=>{const op=e.target.dataset.op;if(op){cfg.ops[op]=!cfg.ops[op];render()}};
+  $("durRow").onclick=e=>{const d=e.target.closest("[data-dur]")?.dataset.dur;if(d){cfg.duration=+d;render()}};
+  const opHandler=e=>{const el=e.target.closest("[data-op]");if(el){cfg.ops[el.dataset.op]=!cfg.ops[el.dataset.op];render()}};
+  $("intOpRow").onclick=opHandler;
+  $("advOpRow").onclick=opHandler;
   $("rangeArea").oninput=e=>{const k=e.target.dataset.rk;if(k)cfg.r[k]=Math.max(0,+e.target.value)};
-  $("backBtn").onclick=$("saveBtn").onclick=()=>{saveLS("md4-c",cfg);view="menu";render()};
+  $("backBtn").onclick=$("saveBtn").onclick=()=>{saveLS("md5-c",cfg);view="menu";render()};
   $("resetBtn").onclick=()=>{cfg={...DEF,ops:{...DEF.ops},r:{...DEF.r}};render()};
 }
 
 function renderCountdown(){
   let n=3;
   app.innerHTML=`<div class="countdown-num" id="cn">${n}</div>`;
-  const iv=setInterval(()=>{
-    n--;
-    if(n<=0){clearInterval(iv);startGame();return}
-    const el=$("cn");if(el){el.textContent=n;el.style.animation="none";el.offsetHeight;el.style.animation="cpulse .6s ease-in-out"}
-  },600);
+  const iv=setInterval(()=>{n--;if(n<=0){clearInterval(iv);startGame();return}const el=$("cn");if(el){el.textContent=n;el.style.animation="none";el.offsetHeight;el.style.animation="cpulse .6s ease-in-out"}},600);
 }
 
 function startGame(){
   score=0;total=0;log=[];byOp={};logOpen=false;
   timeLeft=cfg.duration;problem=gen();input="";probStart=Date.now();
   view="game";renderGame();
-  timerId=setInterval(()=>{
-    timeLeft--;
-    if(timeLeft<=0){clearInterval(timerId);timerId=null;endGame();return}
+  timerId=setInterval(()=>{timeLeft--;if(timeLeft<=0){clearInterval(timerId);timerId=null;endGame();return}
     const te=$("timer");if(te){te.textContent=fmt(timeLeft);te.className=timeLeft<=10?"hud-timer urgent":"hud-timer"}
     const pf=$("progFill");if(pf){const p=((cfg.duration-timeLeft)/cfg.duration)*100;pf.style.width=p+"%";if(timeLeft<=10)pf.classList.add("urgent")}
   },1000);
@@ -329,48 +395,67 @@ function startGame(){
 function endGame(){
   if(timerId){clearInterval(timerId);timerId=null}
   const entry={ts:Date.now(),score,total,duration:cfg.duration,byOp:{...byOp}};
-  hist.push(entry);if(hist.length>200)hist=hist.slice(-200);
-  saveLS("md4-h",hist);view="result";render();
+  hist.push(entry);if(hist.length>200)hist=hist.slice(-200);saveLS("md5-h",hist);
+  view="result";render();
 }
 
 function renderGame(){
-  const pct=((cfg.duration-timeLeft)/cfg.duration)*100;
-  const urg=timeLeft<=10&&timeLeft>0;
+  const pct=((cfg.duration-timeLeft)/cfg.duration)*100;const urg=timeLeft<=10&&timeLeft>0;
+  // Use inputmode="decimal" if decimal ops are active, otherwise "numeric"
+  const imode=hasDecOps()?"decimal":"numeric";
   app.innerHTML=`
     <div class="prog-bar"><div class="prog-fill${urg?" urgent":""}" id="progFill" style="width:${pct}%"></div></div>
     <div class="game-hud"><span class="hud-timer${urg?" urgent":""}" id="timer">${fmt(timeLeft)}</span><div style="display:flex;flex-direction:column;align-items:flex-end"><span class="hud-score-num" id="scoreNum">${score}</span><span class="hud-score-label">correct</span></div></div>
     <div class="game-body"><div class="game-q" id="qText">${problem.text}</div><div class="game-eq">=</div>
-    <input inputmode="numeric" pattern="[0-9]*" class="game-input" id="gi" value="${input}" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="done"></div>
+    <input inputmode="${imode}" pattern="[0-9.\\-]*" class="game-input" id="gi" value="${input}" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go"></div>
     <button class="skip-link" id="skipBtn">skip →</button>`;
 
   const gi=$("gi");
   setTimeout(()=>gi?.focus(),50);
 
+  gi.addEventListener("keydown",e=>{if(e.key==="Enter"&&input.trim()){
+    // On Enter, check answer for decimal questions
+    if(checkAnswer(input,problem.answer,problem.dec)){
+      const ms=Date.now()-probStart;try{navigator.vibrate?.(15)}catch{}
+      score++;total++;recOp(problem.op,true,ms);
+      log.push({q:problem.text,a:fmtAns(problem.answer,problem.dec),ok:true,ms});nextProblem();
+    }
+  }});
+
   gi.oninput=e=>{
     let v=e.target.value;
-    if(v==="-"||v===""){input=v;return}
-    if(!/^-?\d+$/.test(v))return;
+    // Allow digits, dot, minus
+    if(!/^-?[\d.]*$/.test(v)){e.target.value=input;return}
     input=v;
-    if(parseInt(v,10)===problem.answer){
-      const ms=Date.now()-probStart;
-      try{navigator.vibrate?.(15)}catch{}
-      score++;total++;recOp(problem.op,true,ms);
-      log.push({q:problem.text,a:problem.answer,ok:true,ms});
-      nextProblem();
+    // For integer problems, auto-check (no Enter needed)
+    if(!problem.dec){
+      if(v==="-"||v==="")return;
+      if(!/^-?\d+$/.test(v))return;
+      if(parseInt(v,10)===problem.answer){
+        const ms=Date.now()-probStart;try{navigator.vibrate?.(15)}catch{}
+        score++;total++;recOp(problem.op,true,ms);
+        log.push({q:problem.text,a:problem.answer.toString(),ok:true,ms});nextProblem();
+      }
+    }
+    // For decimal: also try auto-check when it looks complete (has decimal + digits after)
+    if(problem.dec&&v.includes(".")&&v.length>=2&&!v.endsWith(".")){
+      if(checkAnswer(v,problem.answer,true)){
+        const ms=Date.now()-probStart;try{navigator.vibrate?.(15)}catch{}
+        score++;total++;recOp(problem.op,true,ms);
+        log.push({q:problem.text,a:fmtAns(problem.answer,true),ok:true,ms});nextProblem();
+      }
     }
   };
   $("skipBtn").onclick=()=>{
     const ms=Date.now()-probStart;total++;recOp(problem.op,false,ms);
-    log.push({q:problem.text,a:problem.answer,ok:false,ms});
-    nextProblem();
+    log.push({q:problem.text,a:fmtAns(problem.answer,problem.dec),ok:false,ms});nextProblem();
   };
   app.onclick=e=>{if(e.target.id!=="skipBtn")gi?.focus()};
 }
 
 function recOp(op,ok,ms){
   if(!byOp[op])byOp[op]={c:0,t:0,totalMs:0};
-  byOp[op].c+=ok?1:0;byOp[op].t++;byOp[op].totalMs+=ms;
-  byOp[op].avgMs=byOp[op].totalMs/byOp[op].t;
+  byOp[op].c+=ok?1:0;byOp[op].t++;byOp[op].totalMs+=ms;byOp[op].avgMs=byOp[op].totalMs/byOp[op].t;
 }
 
 function nextProblem(){
@@ -392,77 +477,54 @@ function renderResult(){
     opHtml=`<div class="op-rows">${Object.entries(byOp).map(([op,d])=>{
       const p=d.t?Math.round(d.c/d.t*100):0;const ms=(d.totalMs/d.t/1000).toFixed(1);
       const col=p>90?"var(--grn)":p>75?"var(--gold)":"var(--red)";
-      return`<div class="op-row"><span class="op-sym">${OP[op]}</span><div class="op-bar"><div class="op-fill" style="width:${p}%;background:${col}"></div></div><span class="op-pct">${p}%</span><span class="op-ms">${ms}s</span></div>`;
-    }).join("")}</div>`;
+      return`<div class="op-row"><span class="op-sym">${OP_SYM(op)}</span><div class="op-bar"><div class="op-fill" style="width:${p}%;background:${col}"></div></div><span class="op-pct">${p}%</span><span class="op-ms">${ms}s</span></div>`}).join("")}</div>`;
   }
 
-  let insightHtml="";
-  if(wa?.insights?.[0]){const i=wa.insights[0];insightHtml=`<div class="insight ${i.sev}"><div class="insight-icon">${{accuracy:"◎",speed:"⏱",trend:"↗"}[i.type]||"•"}</div><div class="insight-text">${i.msg}</div></div>`}
+  let insH="";
+  if(wa?.insights?.[0]){const i=wa.insights[0];insH=`<div class="insight ${i.sev}"><div class="insight-icon">${{accuracy:"◎",speed:"⏱",trend:"↗"}[i.type]||"•"}</div><div class="insight-text">${i.msg}</div></div>`}
 
-  let logHtml="";
-  if(log.length){
-    logHtml=`<button class="log-toggle" id="logToggle">▸ View all ${log.length} problems</button><div class="log-box hide" id="logBox">${log.map(h=>`<div class="log-item" style="color:${h.ok?"var(--grn)":"var(--red)"}"><span>${h.q} = ${h.a}</span><span style="font-size:10px;opacity:.6">${h.ok?(h.ms/1000).toFixed(1)+"s":"skipped"}</span></div>`).join("")}</div>`;
-  }
+  let logH="";
+  if(log.length){logH=`<button class="log-toggle" id="logToggle">▸ View all ${log.length} problems</button><div class="log-box hide" id="logBox">${log.map(h=>`<div class="log-item" style="color:${h.ok?"var(--grn)":"var(--red)"}"><span>${h.q} = ${h.a}</span><span style="font-size:10px;opacity:.6">${h.ok?(h.ms/1000).toFixed(1)+"s":"skipped"}</span></div>`).join("")}</div>`}
 
   app.innerHTML=`<div class="card" style="max-width:440px">
-    <div class="result-score">${score}</div>
-    <div class="result-sub">correct in ${fmt(cfg.duration)}</div>
+    <div class="result-score">${score}</div><div class="result-sub">correct in ${fmt(cfg.duration)}</div>
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-key">Attempted</div></div>
       <div class="stat-card"><div class="stat-val">${acc}%</div><div class="stat-key">Accuracy</div></div>
       <div class="stat-card"><div class="stat-val">${spd}</div><div class="stat-key">Per Min</div></div>
       <div class="stat-card"><div class="stat-val">${(avgMs/1000).toFixed(1)}s</div><div class="stat-key">Avg Time</div></div>
     </div>
-    ${opHtml}${insightHtml}${logHtml}
+    ${opHtml}${insH}${logH}
     <button class="btn-p" id="againBtn">Play Again</button>
     <button class="btn-g" id="menuBtn">Menu</button>
   </div>`;
-
   $("againBtn").onclick=()=>{view="countdown";render()};
   $("menuBtn").onclick=()=>{view="menu";render()};
   const lt=$("logToggle");if(lt)lt.onclick=()=>{logOpen=!logOpen;const lb=$("logBox");if(lb)lb.classList.toggle("hide");lt.textContent=(logOpen?"▾":"▸")+` View all ${log.length} problems`};
 }
 
 function renderProgress(){
-  if(!hist.length){
-    app.innerHTML=`<div class="card"><h2 style="font-size:20px;font-weight:700">Progress</h2><p style="color:var(--d);font-size:13px">Complete a session to see analytics.</p><button class="btn-p" id="backBtn">Back</button></div>`;
-    $("backBtn").onclick=()=>{view="menu";render()};return;
-  }
+  if(!hist.length){app.innerHTML=`<div class="card"><h2 style="font-size:20px;font-weight:700">Progress</h2><p style="color:var(--d);font-size:13px">Complete a session to see analytics.</p><button class="btn-p" id="backBtn">Back</button></div>`;$("backBtn").onclick=()=>{view="menu";render()};return}
   const wa=analyze();const recent=hist.slice(-40);
   const cd=recent.map((s,i)=>({label:new Date(s.ts).toLocaleDateString("en-US",{month:"short",day:"numeric"}),score:s.score,speed:s.duration?+(s.score/(s.duration/60)).toFixed(1):0}));
-  const best=Math.max(...recent.map(s=>s.score));
-  const avg=(recent.reduce((a,s)=>a+s.score,0)/recent.length).toFixed(1);
-  const totalP=recent.reduce((a,s)=>a+(s.total||0),0);
-
-  let rdHtml="";
-  if(wa)rdHtml=`<div class="rb" style="border-color:${wa.rc}"><div class="rb-label" style="color:${wa.rc}">${wa.rd}</div><div class="rb-sub">${hist.length} sessions · ${totalP} problems solved</div></div>`;
-
-  let insHtml="";
-  if(wa?.insights?.length){insHtml=`<div class="section"><div class="s-title">INSIGHTS</div>${wa.insights.map(i=>`<div class="insight ${i.sev}"><div class="insight-icon">${{accuracy:"◎",speed:"⏱",trend:"↗"}[i.type]||"•"}</div><div class="insight-text">${i.msg}</div></div>`).join("")}</div>`}
-
-  let opHtml="";
-  if(wa?.analysis?.length){opHtml=`<div class="section"><div class="s-title">ACCURACY BY OPERATION</div><div class="chart-box">${opBarsSvg(wa.analysis)}</div></div>`}
-
+  const best=Math.max(...recent.map(s=>s.score));const avg=(recent.reduce((a,s)=>a+s.score,0)/recent.length).toFixed(1);const totalP=recent.reduce((a,s)=>a+(s.total||0),0);
+  let rdH="";if(wa)rdH=`<div class="rb" style="border-color:${wa.rc}"><div class="rb-label" style="color:${wa.rc}">${wa.rd}</div><div class="rb-sub">${hist.length} sessions · ${totalP} problems solved</div></div>`;
+  let insH="";if(wa?.insights?.length){insH=`<div class="section"><div class="s-title">INSIGHTS</div>${wa.insights.map(i=>`<div class="insight ${i.sev}"><div class="insight-icon">${{accuracy:"◎",speed:"⏱",trend:"↗"}[i.type]||"•"}</div><div class="insight-text">${i.msg}</div></div>`).join("")}</div>`}
+  let opH="";if(wa?.analysis?.length){opH=`<div class="section"><div class="s-title">ACCURACY BY OPERATION</div><div class="chart-box">${opBarsSvg(wa.analysis)}</div></div>`}
   app.innerHTML=`<div class="card" style="max-width:480px">
-    <h2 style="font-size:20px;font-weight:700">Progress</h2>
-    ${rdHtml}
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-val">${best}</div><div class="stat-key">Best Score</div></div>
-      <div class="stat-card"><div class="stat-val">${avg}</div><div class="stat-key">Average</div></div>
-    </div>
-    ${insHtml}
+    <h2 style="font-size:20px;font-weight:700">Progress</h2>${rdH}
+    <div class="stats-grid"><div class="stat-card"><div class="stat-val">${best}</div><div class="stat-key">Best Score</div></div><div class="stat-card"><div class="stat-val">${avg}</div><div class="stat-key">Average</div></div></div>
+    ${insH}
     <div class="section"><div class="s-title">SCORE TREND</div><div class="chart-box">${svgChart(cd,"score","#f97316",130)}</div></div>
     <div class="section"><div class="s-title">SPEED (PER MIN)</div><div class="chart-box">${svgChart(cd,"speed","#facc15",110)}</div></div>
-    ${opHtml}
+    ${opH}
     <button class="btn-p" style="margin-top:12px" id="backBtn">Back</button>
     <button class="btn-g" style="font-size:11px;color:var(--d);border-color:var(--b);margin-top:4px" id="clearBtn">Reset Progress</button>
   </div>`;
-
   $("backBtn").onclick=()=>{view="menu";render()};
-  $("clearBtn").onclick=()=>{if(confirm("Clear all progress data?")){hist=[];saveLS("md4-h",[]);render()}};
+  $("clearBtn").onclick=()=>{if(confirm("Clear all progress data?")){hist=[];saveLS("md5-h",[]);render()}};
 }
 
-// ─── Boot ───
 render();
 </script>
 </body>
