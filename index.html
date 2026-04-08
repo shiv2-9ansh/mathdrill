@@ -142,7 +142,7 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 
 /* Nav tabs */
 .nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--b);display:flex;padding-bottom:var(--sb);z-index:20}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0;background:none;border:none;color:var(--d);cursor:pointer;font-family:var(--f);font-size:9px;letter-spacing:.5px}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0;background:none;border:none;color:#a1a1aa;cursor:pointer;font-family:var(--f);font-size:9px;letter-spacing:.5px}
 .nav-btn.active{color:var(--acc)}
 .nav-icon{font-size:18px}
 
@@ -166,7 +166,6 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
   🔧 FIREBASE CONFIG — REPLACE WITH YOUR OWN
   See setup instructions at bottom of this file
 ═══════════════════════════════════════════════════*/
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDRWow5cDBJRtAAsTRSoDxQaWQ_yCNQL-Y",
   authDomain: "mathdrill-9da20.firebaseapp.com",
@@ -331,10 +330,6 @@ async function addFriendByCode(code){
     const friendList=[...(userProfile.friends||[]),friendUid];
     await db.collection("users").doc(currentUser.uid).update({friends:friendList});
     userProfile.friends=friendList;
-    // Add reverse
-    const friendData=snap.docs[0].data();
-    const theirFriends=[...(friendData.friends||[]),currentUser.uid];
-    await db.collection("users").doc(friendUid).update({friends:theirFriends});
     return"ok";
   }catch(e){return"Error: "+e.message}
 }
