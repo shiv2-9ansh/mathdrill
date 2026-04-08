@@ -11,6 +11,12 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a0a0a'/><text x='50' y='68' font-size='52' text-anchor='middle'>⚡</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a0a0a'/><text x='50' y='68' font-size='52' text-anchor='middle'>⚡</text></svg>">
 <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTWF0aERyaWxsIiwic2hvcnRfbmFtZSI6Ik1hdGhEcmlsbCIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGEwYTBhIiwidGhlbWVfY29sb3IiOiIjMGEwYTBhIn0=">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap');
 :root{
@@ -26,6 +32,8 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 .hide{display:none!important}
 .card{width:100%;max-width:400px;display:flex;flex-direction:column;align-items:center;gap:10px;animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cpulse{0%{transform:scale(1.3);opacity:.5}100%{transform:scale(1);opacity:1}}
+@keyframes streakPop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
 
 .brand-mark{font-size:44px;line-height:1;margin-bottom:4px}
 .brand-name{font-size:32px;font-weight:800;letter-spacing:-2px;background:linear-gradient(135deg,#facc15 0%,#f97316 50%,#ef4444 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -35,8 +43,14 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 .btn-p:active{opacity:.85;transform:scale(.98)}
 .btn-g{background:none;border:1px solid var(--b2);color:var(--m);padding:11px 16px;border-radius:11px;cursor:pointer;font-size:13px;font-family:var(--f)}
 .btn-g:active{background:var(--s)}
+.btn-sm{background:none;border:1px solid var(--b2);color:var(--m);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:11px;font-family:var(--f)}
 .btn-row{display:flex;gap:8px;width:100%;max-width:320px}
 .btn-row>*{flex:1}
+.btn-danger{background:none;border:1px solid #7f1d1d;color:#f87171;padding:7px 12px;border-radius:8px;cursor:pointer;font-size:11px;font-family:var(--f)}
+
+.input-field{width:100%;max-width:320px;background:var(--s);border:1px solid var(--b2);border-radius:10px;padding:13px 14px;color:var(--t);font-size:14px;font-family:var(--f);outline:none}
+.input-field:focus{border-color:var(--acc)}
+.input-field::placeholder{color:var(--d)}
 
 .cfg-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-bottom:4px}
 .cfg-chip{background:#141414;border:1px solid var(--b2);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--m);letter-spacing:.5px}
@@ -44,6 +58,20 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 
 .last-card{width:100%;max-width:320px;display:flex;justify-content:space-between;align-items:center;background:var(--s);border:1px solid var(--b);border-radius:12px;padding:12px 16px;margin-bottom:2px}
 .readiness{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;border:1px solid;border-radius:20px;padding:4px 14px;margin-bottom:4px}
+
+/* Streak card */
+.streak-card{width:100%;max-width:320px;background:var(--s);border:1px solid var(--b);border-radius:14px;padding:14px 16px;display:flex;gap:16px;align-items:center;margin-bottom:4px}
+.streak-flame{font-size:32px;line-height:1}
+.streak-info{flex:1}
+.streak-count{font-size:24px;font-weight:800;color:var(--acc)}
+.streak-label{font-size:10px;color:var(--d);text-transform:uppercase;letter-spacing:1px}
+.streak-best{font-size:11px;color:var(--d);margin-top:2px}
+
+/* Live streak in game */
+.live-streak{position:fixed;top:calc(50px + var(--st));left:0;right:0;text-align:center;z-index:10;pointer-events:none}
+.live-streak-num{font-size:16px;font-weight:800;color:var(--acc);display:inline-block}
+.live-streak-num.pop{animation:streakPop .3s ease}
+.live-streak-label{font-size:9px;color:var(--d);text-transform:uppercase;letter-spacing:1px}
 
 .s-title{font-size:10px;color:var(--d);letter-spacing:1.5px;font-weight:600;margin-top:16px;margin-bottom:6px;align-self:flex-start}
 .chip-row{display:flex;gap:6px;width:100%;flex-wrap:wrap}
@@ -59,7 +87,6 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 .range-input:focus{border-color:var(--acc)}
 
 .countdown-num{font-size:96px;font-weight:800;color:var(--gold);line-height:1;animation:cpulse .6s ease-in-out}
-@keyframes cpulse{0%{transform:scale(1.3);opacity:.5}100%{transform:scale(1);opacity:1}}
 
 .prog-bar{position:fixed;top:0;left:0;right:0;height:3px;background:#141414;z-index:10}
 .prog-fill{height:100%;background:linear-gradient(90deg,#facc15,#f97316);transition:width 1s linear}
@@ -70,7 +97,7 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 .hud-score-num{font-size:28px;font-weight:800;color:var(--gold);line-height:1}
 .hud-score-label{font-size:9px;color:var(--d);text-transform:uppercase;letter-spacing:1px}
 .game-body{display:flex;flex-direction:column;align-items:center;gap:6px}
-.game-q{font-size:40px;font-weight:800;letter-spacing:-1px;background:linear-gradient(135deg,#fafafa,#a1a1aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;padding:0 8px;word-break:break-word}
+.game-q{font-size:40px;font-weight:800;letter-spacing:-1px;background:linear-gradient(135deg,#fafafa,#a1a1aa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;padding:0 8px}
 .game-eq{font-size:24px;color:var(--b2);font-weight:300}
 .game-input{width:200px;text-align:center;font-size:40px;font-weight:700;background:transparent;border:none;border-bottom:2px solid var(--b2);color:var(--t);outline:none;padding:6px 0;font-family:var(--f);caret-color:var(--acc)}
 .skip-link{position:fixed;bottom:calc(36px + var(--sb));background:none;border:none;color:var(--dm);font-size:14px;cursor:pointer;font-family:var(--f);padding:8px 20px}
@@ -105,6 +132,29 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 .chart-box{background:#0f0f0f;border:1px solid var(--b);border-radius:12px;padding:16px 12px 8px;margin-top:4px;width:100%;overflow:hidden}
 .chart-box svg{width:100%;display:block}
 .section{width:100%;margin-top:4px}
+
+/* Leaderboard */
+.lb-row{width:100%;display:flex;align-items:center;gap:10px;background:var(--s);border:1px solid var(--b);border-radius:10px;padding:10px 12px;margin-top:4px}
+.lb-rank{font-size:16px;font-weight:800;width:28px;text-align:center;flex-shrink:0}
+.lb-name{flex:1;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-val{font-size:14px;font-weight:700;color:var(--gold)}
+.lb-me{border-color:var(--acc);background:#1a1000}
+
+/* Nav tabs */
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--b);display:flex;padding-bottom:var(--sb);z-index:20}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0;background:none;border:none;color:var(--d);cursor:pointer;font-family:var(--f);font-size:9px;letter-spacing:.5px}
+.nav-btn.active{color:var(--acc)}
+.nav-icon{font-size:18px}
+
+.error-msg{color:var(--red);font-size:12px;text-align:center;min-height:16px;margin-top:4px}
+.btn-google{width:100%;max-width:320px;padding:13px 0;border-radius:12px;background:#fff;color:#333;font-weight:600;font-size:14px;border:none;cursor:pointer;font-family:var(--f);display:flex;align-items:center;justify-content:center;gap:10px}
+.btn-google:active{opacity:.85;transform:scale(.98)}
+.btn-google svg{width:18px;height:18px}
+.auth-divider{width:100%;max-width:320px;display:flex;align-items:center;gap:12px;margin:4px 0}
+.auth-divider::before,.auth-divider::after{content:"";flex:1;height:1px;background:var(--b2)}
+.auth-divider span{font-size:11px;color:var(--d);text-transform:uppercase;letter-spacing:1px}
+.friend-code{font-size:28px;font-weight:800;letter-spacing:4px;color:var(--gold);padding:8px 0}
+.copy-btn{background:var(--s);border:1px solid var(--b2);border-radius:8px;padding:6px 14px;color:var(--m);font-size:12px;font-family:var(--f);cursor:pointer}
 </style>
 </head>
 <body>
@@ -112,164 +162,236 @@ html,body{background:var(--bg);color:var(--t);font-family:var(--f);height:100%;o
 <script>
 "use strict";
 
-// ─── Operations ───
+/*═══════════════════════════════════════════════════
+  🔧 FIREBASE CONFIG — REPLACE WITH YOUR OWN
+  See setup instructions at bottom of this file
+═══════════════════════════════════════════════════*/
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDRWow5cDBJRtAAsTRSoDxQaWQ_yCNQL-Y",
+  authDomain: "mathdrill-9da20.firebaseapp.com",
+  projectId: "mathdrill-9da20",
+  storageBucket: "mathdrill-9da20.firebasestorage.app",
+  messagingSenderId: "1003675186914",
+  appId: "1:1003675186914:web:2ba46111409647c163d0bb",
+  measurementId: "G-RDPX8BFQXN"
+};
+/*const FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "000000000000",
+  appId: "YOUR_APP_ID"
+};*/
+
+// Check if Firebase is configured
+const FB_READY = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
+let db, auth;
+if(FB_READY){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db = firebase.firestore();
+  auth = firebase.auth();
+  // Enable offline persistence
+  db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+}
+
+// ─── State ───
 const ALL_OPS={
-  add:{sym:"+",name:"Addition",cat:"int"},
-  sub:{sym:"−",name:"Subtraction",cat:"int"},
-  mul:{sym:"×",name:"Multiplication",cat:"int"},
-  div:{sym:"÷",name:"Division",cat:"int"},
-  decAdd:{sym:".+",name:"Dec Add/Sub",cat:"adv"},
-  decMul:{sym:".×",name:"Dec Mul/Div",cat:"adv"},
-  pct:{sym:"%",name:"Percentage",cat:"adv"},
-  frac:{sym:"⅓",name:"Fractions",cat:"adv"},
+  add:{sym:"+",name:"Addition",cat:"int"},sub:{sym:"−",name:"Subtraction",cat:"int"},
+  mul:{sym:"×",name:"Multiplication",cat:"int"},div:{sym:"÷",name:"Division",cat:"int"},
+  decAdd:{sym:".+",name:"Dec Add/Sub",cat:"adv"},decMul:{sym:".×",name:"Dec Mul/Div",cat:"adv"},
+  pct:{sym:"%",name:"Percentage",cat:"adv"},frac:{sym:"⅓",name:"Fractions",cat:"adv"},
 };
 const OP_SYM=k=>ALL_OPS[k]?.sym||k;
 const OP_NAME=k=>ALL_OPS[k]?.name||k;
 const DURS=[60,120,180,300];
-const DEF={
-  duration:120,
-  ops:{add:true,sub:true,mul:true,div:true,decAdd:false,decMul:false,pct:false,frac:false},
-  r:{addLo:2,addHi:100,subLo:2,subHi:100,mulLo:2,mulHi:12,divLo:2,divHi:12}
-};
+const DEF={duration:120,ops:{add:true,sub:true,mul:true,div:true,decAdd:false,decMul:false,pct:false,frac:false},r:{addLo:2,addHi:100,subLo:2,subHi:100,mulLo:2,mulHi:12,divLo:2,divHi:12}};
 
-let cfg=loadLS("md5-c",DEF);
+let cfg=lls("md6-c",DEF);
 cfg={...DEF,...cfg,ops:{...DEF.ops,...(cfg.ops||{})},r:{...DEF.r,...(cfg.r||{})}};
-let hist=loadLS("md5-h",[]);
-let view="menu",problem=null,input="",score=0,total=0,timeLeft=0;
+let hist=lls("md6-h",[]);
+let streakData=lls("md6-s",{current:0,best:0,lastDate:null});
+let currentUser=null, userProfile=null, friends=[];
+let view="loading",tab="home";
+let problem=null,input="",score=0,total=0,timeLeft=0;
 let log=[],byOp={},probStart=0,timerId=null,logOpen=false;
+let liveStreak=0,bestLiveStreak=0;
 
-function loadLS(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch{return fb}}
-function saveLS(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+function lls(k,fb){try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb}catch{return fb}}
+function sls(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
 const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
 const round2=n=>Math.round(n*100)/100;
 const pick=arr=>arr[rand(0,arr.length-1)];
+const today=()=>new Date().toISOString().split("T")[0];
+const $=id=>document.getElementById(id);
+const app=$("app");
+
+// ─── Auth ───
+function initAuth(){
+  if(!FB_READY){view="menu";render();return}
+  auth.onAuthStateChanged(async user=>{
+    if(user){
+      currentUser=user;
+      await loadProfile();
+      await syncFromCloud();
+      view="menu";
+    }else{
+      currentUser=null;userProfile=null;
+      view="auth";
+    }
+    render();
+  });
+}
+
+async function loadProfile(){
+  if(!currentUser)return;
+  try{
+    const doc=await db.collection("users").doc(currentUser.uid).get();
+    if(doc.exists){userProfile=doc.data()}
+    else{
+      // Create profile
+      const code=genFriendCode();
+      userProfile={name:currentUser.displayName||currentUser.email?.split("@")[0]||"Player",code,friends:[],createdAt:Date.now()};
+      await db.collection("users").doc(currentUser.uid).set(userProfile);
+    }
+  }catch(e){console.error("Profile load error:",e)}
+}
+
+function genFriendCode(){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let c="";for(let i=0;i<6;i++)c+=chars[rand(0,chars.length-1)];
+  return c;
+}
+
+async function syncFromCloud(){
+  if(!currentUser)return;
+  try{
+    const snap=await db.collection("users").doc(currentUser.uid).collection("sessions").orderBy("ts","desc").limit(200).get();
+    if(!snap.empty){
+      const cloudHist=snap.docs.map(d=>d.data());
+      // Merge: use cloud as source of truth
+      const local=new Set(hist.map(h=>h.ts));
+      cloudHist.forEach(h=>{if(!local.has(h.ts))hist.push(h)});
+      hist.sort((a,b)=>a.ts-b.ts);
+      hist=hist.slice(-200);
+      sls("md6-h",hist);
+    }
+    // Sync streak
+    const sd=await db.collection("users").doc(currentUser.uid).collection("meta").doc("streak").get();
+    if(sd.exists){
+      const cloud=sd.data();
+      if((cloud.current||0)>=(streakData.current||0)){streakData=cloud;sls("md6-s",streakData)}
+    }
+  }catch(e){console.error("Sync error:",e)}
+}
+
+async function saveSessionCloud(entry){
+  if(!currentUser)return;
+  try{
+    await db.collection("users").doc(currentUser.uid).collection("sessions").add(entry);
+    // Update user summary for leaderboard
+    const best=Math.max(...hist.map(h=>h.score),entry.score);
+    const totalSessions=hist.length;
+    await db.collection("users").doc(currentUser.uid).update({
+      bestScore:best,totalSessions,lastPlayed:Date.now(),
+      dailyStreak:streakData.current,bestStreak:streakData.best,
+      bestLiveStreak:Math.max(userProfile?.bestLiveStreak||0,bestLiveStreak)
+    });
+    userProfile.bestScore=best;
+    userProfile.bestLiveStreak=Math.max(userProfile?.bestLiveStreak||0,bestLiveStreak);
+  }catch(e){console.error("Save error:",e)}
+}
+
+async function saveStreakCloud(){
+  if(!currentUser)return;
+  try{await db.collection("users").doc(currentUser.uid).collection("meta").doc("streak").set(streakData)}catch{}
+}
+
+// ─── Daily Streak ───
+function updateDailyStreak(){
+  const t=today();
+  if(streakData.lastDate===t)return; // Already played today
+  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+  const y=yesterday.toISOString().split("T")[0];
+  if(streakData.lastDate===y){
+    streakData.current++;
+  }else if(streakData.lastDate!==t){
+    streakData.current=1; // Reset
+  }
+  streakData.lastDate=t;
+  if(streakData.current>streakData.best)streakData.best=streakData.current;
+  sls("md6-s",streakData);
+  saveStreakCloud();
+}
+
+// ─── Friends ───
+async function addFriendByCode(code){
+  if(!currentUser||!FB_READY)return"Login required";
+  code=code.toUpperCase().trim();
+  if(code===userProfile?.code)return"That's your own code";
+  try{
+    const snap=await db.collection("users").where("code","==",code).limit(1).get();
+    if(snap.empty)return"Code not found";
+    const friendUid=snap.docs[0].id;
+    if(userProfile.friends?.includes(friendUid))return"Already friends";
+    const friendList=[...(userProfile.friends||[]),friendUid];
+    await db.collection("users").doc(currentUser.uid).update({friends:friendList});
+    userProfile.friends=friendList;
+    // Add reverse
+    const friendData=snap.docs[0].data();
+    const theirFriends=[...(friendData.friends||[]),currentUser.uid];
+    await db.collection("users").doc(friendUid).update({friends:theirFriends});
+    return"ok";
+  }catch(e){return"Error: "+e.message}
+}
+
+async function loadFriends(){
+  if(!currentUser||!userProfile?.friends?.length)return[];
+  try{
+    const results=[];
+    // Firestore "in" queries support max 10
+    const chunks=[];
+    const fl=userProfile.friends;
+    for(let i=0;i<fl.length;i+=10)chunks.push(fl.slice(i,i+10));
+    for(const chunk of chunks){
+      const snap=await db.collection("users").where(firebase.firestore.FieldPath.documentId(),"in",chunk).get();
+      snap.forEach(d=>results.push({uid:d.id,...d.data()}));
+    }
+    return results;
+  }catch{return[]}
+}
 
 // ─── Problem Generation ───
-// Common fractions for mental math
-const FRACS=[
-  [1,2,.5],[1,3,.3333],[2,3,.6667],[1,4,.25],[3,4,.75],
-  [1,5,.2],[2,5,.4],[3,5,.6],[4,5,.8],
-  [1,6,.1667],[5,6,.8333],[1,8,.125],[3,8,.375],[5,8,.625],[7,8,.875],
-  [1,10,.1],[3,10,.3],[7,10,.7],[9,10,.9],
-  [1,12,.0833],[5,12,.4167],[7,12,.5833],[11,12,.9167],
-];
+const FRACS=[[1,2,.5],[1,3,.3333],[2,3,.6667],[1,4,.25],[3,4,.75],[1,5,.2],[2,5,.4],[3,5,.6],[4,5,.8],[1,6,.1667],[5,6,.8333],[1,8,.125],[3,8,.375],[5,8,.625],[7,8,.875],[1,10,.1],[3,10,.3],[7,10,.7],[9,10,.9]];
 
 function gen(){
   const pool=Object.entries(cfg.ops).filter(([,v])=>v).map(([k])=>k);
   if(!pool.length)return{text:"0 + 0",answer:0,op:"add",dec:false};
-  const op=pick(pool);const r=cfg.r;
-  let a,b,answer,text,dec=false;
-
+  const op=pick(pool);const r=cfg.r;let a,b,answer,text,dec=false;
   switch(op){
-    case"add":
-      a=rand(r.addLo,r.addHi);b=rand(r.addLo,r.addHi);
-      text=`${a} + ${b}`;answer=a+b;break;
-    case"sub":
-      a=rand(r.subLo,r.subHi);b=rand(r.subLo,a);
-      text=`${a} − ${b}`;answer=a-b;break;
-    case"mul":
-      a=rand(r.mulLo,r.mulHi);b=rand(r.mulLo,r.mulHi);
-      text=`${a} × ${b}`;answer=a*b;break;
-    case"div":
-      b=rand(Math.max(2,r.divLo),r.divHi);answer=rand(r.divLo,r.divHi);
-      a=b*answer;text=`${a} ÷ ${b}`;break;
-
-    // ─── Decimal Add/Sub ───
-    case"decAdd":{
-      dec=true;
-      const doSub=Math.random()<.5;
-      // 1 decimal place, numbers 1.0-99.9
-      a=round2(rand(10,999)/10); b=round2(rand(10,999)/10);
-      if(doSub&&b>a)[a,b]=[b,a];
-      if(doSub){text=`${a} − ${b}`;answer=round2(a-b)}
-      else{text=`${a} + ${b}`;answer=round2(a+b)}
-      break;
-    }
-
-    // ─── Decimal Mul/Div ───
-    case"decMul":{
-      dec=true;
-      const doDiv=Math.random()<.5;
-      if(doDiv){
-        // e.g. 14.4 ÷ 1.2 = 12
-        b=round2(rand(12,99)/10); // 1.2 - 9.9
-        answer=rand(2,30);
-        a=round2(b*answer);
-        text=`${a} ÷ ${b}`;
-      }else{
-        // e.g. 3.5 × 1.4
-        a=round2(rand(11,99)/10);b=round2(rand(11,99)/10);
-        answer=round2(a*b);
-        text=`${a} × ${b}`;
-      }
-      break;
-    }
-
-    // ─── Percentage ───
-    case"pct":{
-      dec=true;
-      const pcts=[5,10,12.5,15,20,25,30,33.33,40,50,60,66.67,75,80,90];
-      const p=pick(pcts);
-      const base=pick([20,25,30,40,50,60,75,80,100,120,150,200,250,300,400,500,800,1000]);
-      answer=round2(p*base/100);
-      text=`${p}% of ${base}`;
-      break;
-    }
-
-    // ─── Fractions ───
-    case"frac":{
-      dec=true;
-      const mode=rand(0,2);
-      if(mode===0){
-        // fraction → decimal: "3/8 = ?"
-        const f=pick(FRACS);
-        text=`${f[0]}/${f[1]} = ?`;
-        answer=round2(f[2]);
-      }else if(mode===1){
-        // fraction of number: "3/4 of 80"
-        const f=pick(FRACS.filter(f=>f[2]*100%1<0.01||[.25,.5,.75,.2,.4,.6,.8,.1,.125,.375,.625,.875].includes(f[2])));
-        const bases=[12,16,20,24,25,30,32,36,40,48,50,60,64,72,80,96,100,120,150,200];
-        const base=pick(bases);
-        answer=round2(f[2]*base);
-        text=`${f[0]}/${f[1]} of ${base}`;
-      }else{
-        // mixed: "2 × 3/4"  or "fraction + whole"
-        const f=pick(FRACS);
-        const n=rand(2,12);
-        answer=round2(n*f[2]);
-        text=`${n} × ${f[0]}/${f[1]}`;
-      }
-      break;
-    }
-
-    default:text="0+0";answer=0;
+    case"add":a=rand(r.addLo,r.addHi);b=rand(r.addLo,r.addHi);text=`${a} + ${b}`;answer=a+b;break;
+    case"sub":a=rand(r.subLo,r.subHi);b=rand(r.subLo,a);text=`${a} − ${b}`;answer=a-b;break;
+    case"mul":a=rand(r.mulLo,r.mulHi);b=rand(r.mulLo,r.mulHi);text=`${a} × ${b}`;answer=a*b;break;
+    case"div":b=rand(Math.max(2,r.divLo),r.divHi);answer=rand(r.divLo,r.divHi);a=b*answer;text=`${a} ÷ ${b}`;break;
+    case"decAdd":{dec=true;const sub=Math.random()<.5;a=round2(rand(10,999)/10);b=round2(rand(10,999)/10);if(sub&&b>a)[a,b]=[b,a];text=sub?`${a} − ${b}`:`${a} + ${b}`;answer=round2(sub?a-b:a+b);break}
+    case"decMul":{dec=true;if(Math.random()<.5){b=round2(rand(12,99)/10);answer=rand(2,30);a=round2(b*answer);text=`${a} ÷ ${b}`}else{a=round2(rand(11,99)/10);b=round2(rand(11,99)/10);answer=round2(a*b);text=`${a} × ${b}`}break}
+    case"pct":{dec=true;const p=pick([5,10,12.5,15,20,25,30,33.33,40,50,60,66.67,75,80,90]);const base=pick([20,25,30,40,50,60,75,80,100,120,150,200,250,300,400,500,800,1000]);answer=round2(p*base/100);text=`${p}% of ${base}`;break}
+    case"frac":{dec=true;const mode=rand(0,2);const f=pick(FRACS);
+      if(mode===0){text=`${f[0]}/${f[1]} = ?`;answer=round2(f[2])}
+      else if(mode===1){const base=pick([12,16,20,24,25,30,32,36,40,48,50,60,64,72,80,96,100,120,150,200]);answer=round2(f[2]*base);text=`${f[0]}/${f[1]} of ${base}`}
+      else{const n=rand(2,12);answer=round2(n*f[2]);text=`${n} × ${f[0]}/${f[1]}`}break}
   }
   return{text,answer,op,dec};
 }
 
-// ─── Answer comparison ───
-function checkAnswer(userVal, correct, isDec){
-  if(isDec){
-    // Accept answers rounded to reasonable precision
-    const u=parseFloat(userVal);
-    if(isNaN(u))return false;
-    // Allow within 0.015 tolerance for rounding
-    return Math.abs(u-correct)<0.015;
-  }
-  return parseInt(userVal,10)===correct;
+function checkAnswer(v,correct,isDec){
+  if(isDec){const u=parseFloat(v);return!isNaN(u)&&Math.abs(u-correct)<0.015}
+  return parseInt(v,10)===correct;
 }
-
-// Format answer for display
-function fmtAns(answer,isDec){
-  if(isDec){
-    // Show clean decimal
-    const s=answer.toString();
-    if(s.includes(".")&&s.split(".")[1].length>4)return answer.toFixed(4).replace(/0+$/,"").replace(/\.$/,"");
-    return s;
-  }
-  return answer.toString();
-}
+function fmtAns(a,d){if(d){const s=a.toString();if(s.includes(".")&&s.split(".")[1].length>4)return a.toFixed(4).replace(/0+$/,"").replace(/\.$/,"");return s}return a.toString()}
+function hasDecOps(){return cfg.ops.decAdd||cfg.ops.decMul||cfg.ops.pct||cfg.ops.frac}
 
 // ─── Analysis ───
 function analyze(){
@@ -277,34 +399,24 @@ function analyze(){
   const ops={};
   last10.forEach(s=>{if(!s.byOp)return;Object.entries(s.byOp).forEach(([op,d])=>{
     if(!ops[op])ops[op]={c:0,t:0,ms:0,n:0};ops[op].c+=d.c;ops[op].t+=d.t;
-    if(d.avgMs){ops[op].ms+=d.avgMs*d.t;ops[op].n+=d.t}
-  })});
+    if(d.avgMs){ops[op].ms+=d.avgMs*d.t;ops[op].n+=d.t}})});
   const analysis=Object.entries(ops).map(([op,d])=>({op,acc:d.t?d.c/d.t:0,avgMs:d.n?d.ms/d.n:0,t:d.t,c:d.c})).sort((a,b)=>a.acc-b.acc);
   const insights=[];
   const weak=analysis.filter(a=>a.acc<.85&&a.t>=5);
-  if(weak.length){const w=weak[0];insights.push({type:"accuracy",sev:w.acc<.6?"high":"medium",msg:`${OP_NAME(w.op)} is your weakest at ${Math.round(w.acc*100)}% accuracy. Focus your drills here.`})}
+  if(weak.length){const w=weak[0];insights.push({type:"accuracy",sev:w.acc<.6?"high":"medium",msg:`${OP_NAME(w.op)} weakest at ${Math.round(w.acc*100)}%. Focus drills here.`})}
   const slow=[...analysis].sort((a,b)=>b.avgMs-a.avgMs).filter(a=>a.avgMs>3000);
-  if(slow.length){const s=slow[0];insights.push({type:"speed",sev:s.avgMs>5000?"high":"medium",msg:`${OP_NAME(s.op)} is slowest at ~${(s.avgMs/1000).toFixed(1)}s per problem.`})}
-  const r3=hist.slice(-3),p3=hist.slice(-6,-3);
-  if(r3.length>=3&&p3.length>=3){const d=r3.reduce((a,s)=>a+s.score,0)/3-p3.reduce((a,s)=>a+s.score,0)/3;
-    if(d>3)insights.push({type:"trend",sev:"positive",msg:`Improving! +${d.toFixed(1)} avg score recently.`});
-    else if(d<-3)insights.push({type:"trend",sev:"medium",msg:`Score dipped by ${Math.abs(d).toFixed(1)}. Try shorter or focused sessions.`})
-  }
+  if(slow.length){const s=slow[0];insights.push({type:"speed",sev:s.avgMs>5000?"high":"medium",msg:`${OP_NAME(s.op)} slowest at ~${(s.avgMs/1000).toFixed(1)}s/problem.`})}
   const allAcc=analysis.length?analysis.reduce((a,x)=>a+x.acc,0)/analysis.length:0;
   let rd="Warming Up",rc="#f97316";
   if(allAcc>.95&&hist.length>=10){rd="Interview Ready";rc="#4ade80"}
   else if(allAcc>.85){rd="Getting Sharp";rc="#facc15"}
-  else if(allAcc>.7){rd="Building Speed";rc="#f97316"}
+  else if(allAcc>.7){rd="Building Speed"}
   return{analysis,insights,rd,rc};
 }
 
-// ─── Has any decimal ops enabled ───
-function hasDecOps(){return cfg.ops.decAdd||cfg.ops.decMul||cfg.ops.pct||cfg.ops.frac}
-
 // ─── SVG Charts ───
 function svgChart(data,key,color,h=130){
-  if(!data.length)return"";
-  const w=320,pad=30,gw=w-pad*2,gh=h-30;
+  if(!data.length)return"";const w=320,pad=30,gw=w-pad*2,gh=h-30;
   const vals=data.map(d=>d[key]);const mn=Math.min(...vals),mx=Math.max(...vals)||1;const range=mx-mn||1;
   const pts=data.map((d,i)=>({x:pad+(i/(data.length-1||1))*gw,y:h-15-(((d[key]-mn)/range)*gh)}));
   const pathD=pts.map((p,i)=>i===0?`M${p.x},${p.y}`:`L${p.x},${p.y}`).join(" ");
@@ -321,33 +433,106 @@ function opBarsSvg(analysis){
     return`<text x="10" y="${y+20}" fill="#a1a1aa" font-size="12" font-weight="700" font-family="var(--f)">${OP_SYM(a.op)}</text><rect x="42" y="${y+8}" width="${w-90}" height="14" rx="4" fill="#1a1a1a"/><rect x="42" y="${y+8}" width="${bw}" height="14" rx="4" fill="${color}"/><text x="${w-30}" y="${y+20}" fill="#a1a1aa" font-size="12" font-weight="600" text-anchor="end" font-family="var(--f)">${pct}%</text>`}).join("")}</svg>`;
 }
 
-// ─── Render ───
-const $=id=>document.getElementById(id);
-const app=$("app");
-function render(){({menu:renderMenu,settings:renderSettings,countdown:renderCountdown,game:renderGame,result:renderResult,progress:renderProgress})[view]()}
+// ─── Render Router ───
+function render(){
+  if(view==="loading"){app.innerHTML=`<div style="color:var(--d);font-size:13px">Loading…</div>`;return}
+  if(view==="auth"){renderAuth();return}
+  if(view==="countdown"||view==="game"||view==="result"){({countdown:renderCountdown,game:renderGame,result:renderResult})[view]();return}
+  // Tab views
+  renderTabView();
+}
 
-function renderMenu(){
+function renderTabView(){
+  let content="";
+  switch(tab){
+    case"home":content=menuHTML();break;
+    case"progress":content=progressHTML();break;
+    case"compete":content=competeHTML();break;
+    case"settings":content=settingsHTML();break;
+  }
+  app.innerHTML=`
+    ${content}
+    <nav class="nav">
+      <button class="nav-btn${tab==="home"?" active":""}" data-tab="home"><span class="nav-icon">⚡</span>Drill</button>
+      <button class="nav-btn${tab==="progress"?" active":""}" data-tab="progress"><span class="nav-icon">📊</span>Progress</button>
+      <button class="nav-btn${tab==="compete"?" active":""}" data-tab="compete"><span class="nav-icon">🏆</span>Compete</button>
+      <button class="nav-btn${tab==="settings"?" active":""}" data-tab="settings"><span class="nav-icon">⚙</span>Settings</button>
+    </nav>`;
+  document.querySelectorAll(".nav-btn").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render()});
+  bindTabEvents();
+}
+
+// ─── Auth Screen ───
+function renderAuth(){
+  app.innerHTML=`<div class="card">
+    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:8px">
+      <div class="brand-mark">⚡</div><div class="brand-name">MathDrill</div>
+      <div class="brand-tag">Quant interview mental math trainer</div>
+    </div>
+    <button class="btn-google" id="googleBtn"><svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Continue with Google</button>
+    <div class="auth-divider"><span>or</span></div>
+    <input class="input-field" id="authEmail" type="email" placeholder="Email" autocomplete="email">
+    <input class="input-field" id="authPass" type="password" placeholder="Password" autocomplete="current-password">
+    <div class="error-msg" id="authErr"></div>
+    <button class="btn-p" id="loginBtn">Log In</button>
+    <button class="btn-g" id="signupBtn">Create Account</button>
+    <button class="btn-g" style="border:none;color:var(--d);font-size:11px" id="skipBtn">Continue without account</button>
+  </div>`;
+  $("googleBtn").onclick=async()=>{
+    try{const provider=new firebase.auth.GoogleAuthProvider();await auth.signInWithPopup(provider)}
+    catch(err){$("authErr").textContent=err.message}
+  };
+  $("loginBtn").onclick=async()=>{
+    const e=$("authEmail").value,p=$("authPass").value;
+    if(!e||!p){$("authErr").textContent="Enter email and password";return}
+    try{await auth.signInWithEmailAndPassword(e,p)}catch(err){$("authErr").textContent=err.message}
+  };
+  $("signupBtn").onclick=async()=>{
+    const e=$("authEmail").value,p=$("authPass").value;
+    if(!e||!p){$("authErr").textContent="Enter email and password";return}
+    if(p.length<6){$("authErr").textContent="Password must be 6+ characters";return}
+    try{await auth.createUserWithEmailAndPassword(e,p)}catch(err){$("authErr").textContent=err.message}
+  };
+  $("skipBtn").onclick=()=>{view="menu";render()};
+}
+
+// ─── Menu / Home ───
+function menuHTML(){
   const wa=analyze();const last=hist.length?hist[hist.length-1]:null;
   const intOps=Object.entries(cfg.ops).filter(([k,v])=>v&&ALL_OPS[k]?.cat==="int").map(([k])=>`<span class="cfg-chip">${OP_SYM(k)}</span>`).join("");
   const advOps=Object.entries(cfg.ops).filter(([k,v])=>v&&ALL_OPS[k]?.cat==="adv").map(([k])=>`<span class="cfg-chip adv">${OP_SYM(k)}</span>`).join("");
-  let lastHtml="";
-  if(last){const spd=(last.score/(last.duration/60)).toFixed(1);lastHtml=`<div class="last-card"><div><div style="font-size:10px;color:var(--d);text-transform:uppercase;letter-spacing:1px">Last Session</div><div style="font-size:14px;font-weight:600;color:#a1a1aa">${last.score} correct</div></div><div style="display:flex;flex-direction:column;align-items:flex-end"><div style="font-size:22px;font-weight:800;color:var(--gold)">${spd}</div><div style="font-size:9px;color:#52525b;text-transform:uppercase;letter-spacing:1px">per min</div></div></div>`}
-  let rdH="";if(wa)rdH=`<div class="readiness" style="color:${wa.rc};border-color:${wa.rc}33">${wa.rd}</div>`;
-  app.innerHTML=`<div class="card">
-    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:8px"><div class="brand-mark">⚡</div><div class="brand-name">MathDrill</div><div class="brand-tag">Quant interview mental math trainer</div></div>
-    <div class="cfg-row">${intOps}${advOps}<span class="cfg-chip">${fmt(cfg.duration)}</span></div>
-    ${lastHtml}${rdH}
-    <button class="btn-p" id="startBtn">Start Drill</button>
-    <div class="btn-row"><button class="btn-g" id="setBtn">Settings</button><button class="btn-g" id="progBtn">Progress</button></div>
+  const userName=userProfile?.name||currentUser?.displayName||"Player";
+
+  // Streak card
+  const playedToday=streakData.lastDate===today();
+  const streakH=`<div class="streak-card">
+    <div class="streak-flame">${streakData.current>0?"🔥":"💤"}</div>
+    <div class="streak-info">
+      <div class="streak-count">${streakData.current} day${streakData.current!==1?"s":""}</div>
+      <div class="streak-label">${playedToday?"streak maintained today":"play to keep your streak!"}</div>
+      <div class="streak-best">Best: ${streakData.best} days</div>
+    </div>
   </div>`;
-  $("startBtn").onclick=()=>{view="countdown";render()};
-  $("setBtn").onclick=()=>{view="settings";render()};
-  $("progBtn").onclick=()=>{view="progress";render()};
+
+  let lastH="";
+  if(last){const spd=(last.score/(last.duration/60)).toFixed(1);lastH=`<div class="last-card"><div><div style="font-size:10px;color:var(--d);text-transform:uppercase;letter-spacing:1px">Last Session</div><div style="font-size:14px;font-weight:600;color:#a1a1aa">${last.score} correct</div></div><div style="display:flex;flex-direction:column;align-items:flex-end"><div style="font-size:22px;font-weight:800;color:var(--gold)">${spd}</div><div style="font-size:9px;color:#52525b;text-transform:uppercase;letter-spacing:1px">per min</div></div></div>`}
+  let rdH="";if(wa)rdH=`<div class="readiness" style="color:${wa.rc};border-color:${wa.rc}33">${wa.rd}</div>`;
+
+  return`<div class="card" style="padding-bottom:80px">
+    <div style="font-size:12px;color:var(--d);align-self:flex-start">Hi, <span style="color:var(--m)">${userName}</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:4px">
+      <div class="brand-mark">⚡</div><div class="brand-name">MathDrill</div>
+    </div>
+    ${streakH}
+    <div class="cfg-row">${intOps}${advOps}<span class="cfg-chip">${fmt(cfg.duration)}</span></div>
+    ${lastH}${rdH}
+    <button class="btn-p" id="startBtn">Start Drill</button>
+  </div>`;
 }
 
-function renderSettings(){
+// ─── Settings ───
+function settingsHTML(){
   const durC=DURS.map(d=>`<button class="chip${cfg.duration===d?" on":""}" data-dur="${d}">${fmt(d)}</button>`).join("");
-
   const intOps=["add","sub","mul","div"].map(op=>`<button class="chip${cfg.ops[op]?" on":""}" data-op="${op}"><span>${ALL_OPS[op].sym}</span><span class="chip-label">${ALL_OPS[op].name}</span></button>`).join("");
   const advOps=["decAdd","decMul","pct","frac"].map(op=>`<button class="chip${cfg.ops[op]?" adv-on":""}" data-op="${op}"><span>${ALL_OPS[op].sym}</span><span class="chip-label">${ALL_OPS[op].name}</span></button>`).join("");
 
@@ -356,26 +541,161 @@ function renderSettings(){
     return`<div class="range-row"><span class="range-label">${label}</span><input type="number" inputmode="numeric" pattern="[0-9]*" class="range-input" data-rk="${loK}" value="${cfg.r[loK]}"><span class="range-sep">→</span><input type="number" inputmode="numeric" pattern="[0-9]*" class="range-input" data-rk="${hiK}" value="${cfg.r[hiK]}"></div>`;
   }
 
-  app.innerHTML=`<div class="card" style="align-items:stretch">
-    <button class="btn-g" style="align-self:flex-start;border:none;padding:0;color:#52525b" id="backBtn">← Back</button>
+  let accountH="";
+  if(currentUser){
+    accountH=`<div class="s-title">ACCOUNT</div>
+    <div style="font-size:12px;color:var(--m);margin-bottom:4px">${currentUser.email}</div>
+    <button class="btn-danger" id="logoutBtn">Sign Out</button>`;
+  }else if(FB_READY){
+    accountH=`<div class="s-title">ACCOUNT</div><button class="btn-sm" id="loginNavBtn">Log in to sync & compete</button>`;
+  }
+
+  return`<div class="card" style="align-items:stretch;padding-bottom:80px">
     <h2 style="font-size:20px;font-weight:700;text-align:center">Settings</h2>
     <div class="s-title">DURATION</div><div class="chip-row" id="durRow">${durC}</div>
     <div class="s-title">INTEGER OPERATIONS</div><div class="chip-row" id="intOpRow">${intOps}</div>
     <div class="s-title" style="color:var(--cyan)">ADVANCED · OPTIVER / AKUNA</div><div class="chip-row" id="advOpRow">${advOps}</div>
     <div class="s-title">INTEGER RANGES</div>
     <div id="rangeArea">${rr("+","addLo","addHi","add")}${rr("−","subLo","subHi","sub")}${rr("×","mulLo","mulHi","mul")}${rr("÷","divLo","divHi","div")}</div>
-    <div style="display:flex;gap:8px;margin-top:20px"><button class="btn-g" style="flex:1" id="resetBtn">Reset</button><button class="btn-p" style="flex:2" id="saveBtn">Save</button></div>
+    <div style="display:flex;gap:8px;margin-top:16px"><button class="btn-g" style="flex:1" id="resetCfgBtn">Reset</button><button class="btn-p" style="flex:2" id="saveCfgBtn">Save</button></div>
+    ${accountH}
   </div>`;
-
-  $("durRow").onclick=e=>{const d=e.target.closest("[data-dur]")?.dataset.dur;if(d){cfg.duration=+d;render()}};
-  const opHandler=e=>{const el=e.target.closest("[data-op]");if(el){cfg.ops[el.dataset.op]=!cfg.ops[el.dataset.op];render()}};
-  $("intOpRow").onclick=opHandler;
-  $("advOpRow").onclick=opHandler;
-  $("rangeArea").oninput=e=>{const k=e.target.dataset.rk;if(k)cfg.r[k]=Math.max(0,+e.target.value)};
-  $("backBtn").onclick=$("saveBtn").onclick=()=>{saveLS("md5-c",cfg);view="menu";render()};
-  $("resetBtn").onclick=()=>{cfg={...DEF,ops:{...DEF.ops},r:{...DEF.r}};render()};
 }
 
+// ─── Progress ───
+function progressHTML(){
+  if(!hist.length)return`<div class="card" style="padding-bottom:80px"><h2 style="font-size:20px;font-weight:700">Progress</h2><p style="color:var(--d);font-size:13px">Complete a session to see analytics.</p></div>`;
+  const wa=analyze();const recent=hist.slice(-40);
+  const cd=recent.map(s=>({label:new Date(s.ts).toLocaleDateString("en-US",{month:"short",day:"numeric"}),score:s.score,speed:s.duration?+(s.score/(s.duration/60)).toFixed(1):0}));
+  const best=Math.max(...recent.map(s=>s.score));const avg=(recent.reduce((a,s)=>a+s.score,0)/recent.length).toFixed(1);const totalP=recent.reduce((a,s)=>a+(s.total||0),0);
+  let rdH="";if(wa)rdH=`<div class="rb" style="border-color:${wa.rc}"><div class="rb-label" style="color:${wa.rc}">${wa.rd}</div><div class="rb-sub">${hist.length} sessions · ${totalP} problems solved</div></div>`;
+  let insH="";if(wa?.insights?.length)insH=`<div class="section"><div class="s-title">INSIGHTS</div>${wa.insights.map(i=>`<div class="insight ${i.sev}"><div class="insight-icon">${{accuracy:"◎",speed:"⏱",trend:"↗"}[i.type]||"•"}</div><div class="insight-text">${i.msg}</div></div>`).join("")}</div>`;
+  let opH="";if(wa?.analysis?.length)opH=`<div class="section"><div class="s-title">ACCURACY BY OPERATION</div><div class="chart-box">${opBarsSvg(wa.analysis)}</div></div>`;
+
+  // Best live streak display
+  const bls=Math.max(lls("md6-bls",0),...hist.map(h=>h.bestStreak||0));
+
+  return`<div class="card" style="max-width:480px;padding-bottom:80px">
+    <h2 style="font-size:20px;font-weight:700">Progress</h2>${rdH}
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val">${best}</div><div class="stat-key">Best Score</div></div>
+      <div class="stat-card"><div class="stat-val">${avg}</div><div class="stat-key">Average</div></div>
+      <div class="stat-card"><div class="stat-val">${streakData.current}🔥</div><div class="stat-key">Daily Streak</div></div>
+      <div class="stat-card"><div class="stat-val">${bls}</div><div class="stat-key">Best Live Streak</div></div>
+    </div>
+    ${insH}
+    <div class="section"><div class="s-title">SCORE TREND</div><div class="chart-box">${svgChart(cd,"score","#f97316",130)}</div></div>
+    <div class="section"><div class="s-title">SPEED (PER MIN)</div><div class="chart-box">${svgChart(cd,"speed","#facc15",110)}</div></div>
+    ${opH}
+    <button class="btn-g" style="font-size:11px;color:var(--d);border-color:var(--b);margin-top:8px" id="clearHistBtn">Reset Progress</button>
+  </div>`;
+}
+
+// ─── Compete ───
+function competeHTML(){
+  if(!currentUser){
+    return`<div class="card" style="padding-bottom:80px">
+      <h2 style="font-size:20px;font-weight:700">Compete</h2>
+      <p style="color:var(--d);font-size:13px;text-align:center">Log in to get your friend code, add friends, and see leaderboards.</p>
+      ${FB_READY?'<button class="btn-p" id="compLoginBtn">Log In</button>':'<p style="color:var(--d);font-size:11px">Firebase not configured.</p>'}
+    </div>`;
+  }
+  const code=userProfile?.code||"------";
+  return`<div class="card" style="padding-bottom:80px">
+    <h2 style="font-size:20px;font-weight:700">Compete</h2>
+
+    <div class="s-title">YOUR FRIEND CODE</div>
+    <div class="friend-code" id="myCode">${code}</div>
+    <button class="copy-btn" id="copyCodeBtn">Copy Code</button>
+
+    <div class="s-title">ADD FRIEND</div>
+    <div style="display:flex;gap:8px;width:100%">
+      <input class="input-field" id="friendCodeInput" placeholder="Enter code" style="flex:1;text-transform:uppercase" maxlength="6">
+      <button class="btn-sm" id="addFriendBtn" style="flex-shrink:0">Add</button>
+    </div>
+    <div class="error-msg" id="friendErr"></div>
+
+    <div class="s-title">LEADERBOARD</div>
+    <div id="lbContainer" style="width:100%"><div style="color:var(--d);font-size:12px">Loading…</div></div>
+  </div>`;
+}
+
+// ─── Bind Events per Tab ───
+function bindTabEvents(){
+  if(tab==="home"){
+    $("startBtn")?.addEventListener("click",()=>{view="countdown";render()});
+  }
+  if(tab==="settings"){
+    $("durRow")?.addEventListener("click",e=>{const d=e.target.closest("[data-dur]")?.dataset.dur;if(d){cfg.duration=+d;render()}});
+    const opH=e=>{const el=e.target.closest("[data-op]");if(el){cfg.ops[el.dataset.op]=!cfg.ops[el.dataset.op];render()}};
+    $("intOpRow")?.addEventListener("click",opH);
+    $("advOpRow")?.addEventListener("click",opH);
+    $("rangeArea")?.addEventListener("input",e=>{const k=e.target.dataset.rk;if(k)cfg.r[k]=Math.max(0,+e.target.value)});
+    $("saveCfgBtn")?.addEventListener("click",()=>{sls("md6-c",cfg);tab="home";render()});
+    $("resetCfgBtn")?.addEventListener("click",()=>{cfg={...DEF,ops:{...DEF.ops},r:{...DEF.r}};render()});
+    $("logoutBtn")?.addEventListener("click",()=>{auth.signOut();currentUser=null;userProfile=null;view="auth";render()});
+    $("loginNavBtn")?.addEventListener("click",()=>{view="auth";render()});
+  }
+  if(tab==="progress"){
+    $("clearHistBtn")?.addEventListener("click",()=>{if(confirm("Clear all progress?")){hist=[];sls("md6-h",[]);render()}});
+  }
+  if(tab==="compete"){
+    $("compLoginBtn")?.addEventListener("click",()=>{view="auth";render()});
+    $("copyCodeBtn")?.addEventListener("click",()=>{
+      navigator.clipboard?.writeText(userProfile?.code||"").then(()=>{$("copyCodeBtn").textContent="Copied!";setTimeout(()=>{const b=$("copyCodeBtn");if(b)b.textContent="Copy Code"},1500)}).catch(()=>{})
+    });
+    $("addFriendBtn")?.addEventListener("click",async()=>{
+      const code=$("friendCodeInput")?.value;if(!code)return;
+      const res=await addFriendByCode(code);
+      const err=$("friendErr");
+      if(res==="ok"){if(err)err.style.color="var(--grn)";if(err)err.textContent="Friend added!";loadAndRenderLB()}
+      else{if(err)err.style.color="var(--red)";if(err)err.textContent=res}
+    });
+    // Load leaderboard
+    if(currentUser)loadAndRenderLB();
+  }
+}
+
+async function loadAndRenderLB(){
+  const container=$("lbContainer");if(!container)return;
+  container.innerHTML=`<div style="color:var(--d);font-size:12px">Loading…</div>`;
+  const friendData=await loadFriends();
+
+  // Add self
+  const entries=[{
+    name:userProfile?.name||"You",
+    bestScore:Math.max(...hist.map(h=>h.score),0),
+    dailyStreak:streakData.current,
+    bestLiveStreak:lls("md6-bls",0),
+    isMe:true
+  }];
+  friendData.forEach(f=>entries.push({
+    name:f.name||"Friend",
+    bestScore:f.bestScore||0,
+    dailyStreak:f.dailyStreak||0,
+    bestLiveStreak:f.bestLiveStreak||0,
+    isMe:false
+  }));
+  entries.sort((a,b)=>b.bestScore-a.bestScore);
+
+  if(entries.length<=1&&!friendData.length){
+    container.innerHTML=`<div style="color:var(--d);font-size:12px;text-align:center">Share your code with friends to compete!</div>`;
+    return;
+  }
+
+  const medals=["🥇","🥈","🥉"];
+  container.innerHTML=entries.map((e,i)=>`
+    <div class="lb-row${e.isMe?" lb-me":""}">
+      <div class="lb-rank">${medals[i]||i+1}</div>
+      <div class="lb-name">${e.name}${e.isMe?" (you)":""}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end">
+        <div class="lb-val">${e.bestScore}</div>
+        <div style="font-size:9px;color:var(--d)">${e.dailyStreak}🔥 · ${e.bestLiveStreak}⚡</div>
+      </div>
+    </div>`).join("");
+}
+
+// ─── Game Flow ───
 function renderCountdown(){
   let n=3;
   app.innerHTML=`<div class="countdown-num" id="cn">${n}</div>`;
@@ -384,6 +704,7 @@ function renderCountdown(){
 
 function startGame(){
   score=0;total=0;log=[];byOp={};logOpen=false;
+  liveStreak=0;bestLiveStreak=0;
   timeLeft=cfg.duration;problem=gen();input="";probStart=Date.now();
   view="game";renderGame();
   timerId=setInterval(()=>{timeLeft--;if(timeLeft<=0){clearInterval(timerId);timerId=null;endGame();return}
@@ -394,63 +715,63 @@ function startGame(){
 
 function endGame(){
   if(timerId){clearInterval(timerId);timerId=null}
-  const entry={ts:Date.now(),score,total,duration:cfg.duration,byOp:{...byOp}};
-  hist.push(entry);if(hist.length>200)hist=hist.slice(-200);saveLS("md5-h",hist);
+  updateDailyStreak();
+  // Save best live streak
+  const prevBls=lls("md6-bls",0);
+  if(bestLiveStreak>prevBls)sls("md6-bls",bestLiveStreak);
+
+  const entry={ts:Date.now(),score,total,duration:cfg.duration,byOp:{...byOp},bestStreak:bestLiveStreak};
+  hist.push(entry);if(hist.length>200)hist=hist.slice(-200);sls("md6-h",hist);
+  saveSessionCloud(entry);
   view="result";render();
 }
 
 function renderGame(){
   const pct=((cfg.duration-timeLeft)/cfg.duration)*100;const urg=timeLeft<=10&&timeLeft>0;
-  // Use inputmode="decimal" if decimal ops are active, otherwise "numeric"
   const imode=hasDecOps()?"decimal":"numeric";
   app.innerHTML=`
     <div class="prog-bar"><div class="prog-fill${urg?" urgent":""}" id="progFill" style="width:${pct}%"></div></div>
     <div class="game-hud"><span class="hud-timer${urg?" urgent":""}" id="timer">${fmt(timeLeft)}</span><div style="display:flex;flex-direction:column;align-items:flex-end"><span class="hud-score-num" id="scoreNum">${score}</span><span class="hud-score-label">correct</span></div></div>
+    <div class="live-streak"><span class="live-streak-num" id="lsNum">${liveStreak}</span><br><span class="live-streak-label">streak</span></div>
     <div class="game-body"><div class="game-q" id="qText">${problem.text}</div><div class="game-eq">=</div>
     <input inputmode="${imode}" pattern="[0-9.\\-]*" class="game-input" id="gi" value="${input}" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go"></div>
     <button class="skip-link" id="skipBtn">skip →</button>`;
 
-  const gi=$("gi");
-  setTimeout(()=>gi?.focus(),50);
+  const gi=$("gi");setTimeout(()=>gi?.focus(),50);
 
   gi.addEventListener("keydown",e=>{if(e.key==="Enter"&&input.trim()){
-    // On Enter, check answer for decimal questions
-    if(checkAnswer(input,problem.answer,problem.dec)){
-      const ms=Date.now()-probStart;try{navigator.vibrate?.(15)}catch{}
-      score++;total++;recOp(problem.op,true,ms);
-      log.push({q:problem.text,a:fmtAns(problem.answer,problem.dec),ok:true,ms});nextProblem();
-    }
+    if(checkAnswer(input,problem.answer,problem.dec)){correctAnswer()}
   }});
 
   gi.oninput=e=>{
-    let v=e.target.value;
-    // Allow digits, dot, minus
-    if(!/^-?[\d.]*$/.test(v)){e.target.value=input;return}
-    input=v;
-    // For integer problems, auto-check (no Enter needed)
-    if(!problem.dec){
-      if(v==="-"||v==="")return;
-      if(!/^-?\d+$/.test(v))return;
-      if(parseInt(v,10)===problem.answer){
-        const ms=Date.now()-probStart;try{navigator.vibrate?.(15)}catch{}
-        score++;total++;recOp(problem.op,true,ms);
-        log.push({q:problem.text,a:problem.answer.toString(),ok:true,ms});nextProblem();
-      }
-    }
-    // For decimal: also try auto-check when it looks complete (has decimal + digits after)
-    if(problem.dec&&v.includes(".")&&v.length>=2&&!v.endsWith(".")){
-      if(checkAnswer(v,problem.answer,true)){
-        const ms=Date.now()-probStart;try{navigator.vibrate?.(15)}catch{}
-        score++;total++;recOp(problem.op,true,ms);
-        log.push({q:problem.text,a:fmtAns(problem.answer,true),ok:true,ms});nextProblem();
-      }
-    }
+    let v=e.target.value;if(!/^-?[\d.]*$/.test(v)){e.target.value=input;return}input=v;
+    if(!problem.dec){if(v==="-"||v==="")return;if(!/^-?\d+$/.test(v))return;if(parseInt(v,10)===problem.answer)correctAnswer()}
+    if(problem.dec&&v.includes(".")&&v.length>=2&&!v.endsWith(".")){if(checkAnswer(v,problem.answer,true))correctAnswer()}
   };
   $("skipBtn").onclick=()=>{
     const ms=Date.now()-probStart;total++;recOp(problem.op,false,ms);
-    log.push({q:problem.text,a:fmtAns(problem.answer,problem.dec),ok:false,ms});nextProblem();
+    log.push({q:problem.text,a:fmtAns(problem.answer,problem.dec),ok:false,ms});
+    liveStreak=0;updateLiveStreakUI();
+    nextProblem();
   };
   app.onclick=e=>{if(e.target.id!=="skipBtn")gi?.focus()};
+}
+
+function correctAnswer(){
+  const ms=Date.now()-probStart;try{navigator.vibrate?.(15)}catch{}
+  score++;total++;recOp(problem.op,true,ms);
+  log.push({q:problem.text,a:fmtAns(problem.answer,problem.dec),ok:true,ms});
+  liveStreak++;if(liveStreak>bestLiveStreak)bestLiveStreak=liveStreak;
+  updateLiveStreakUI();
+  nextProblem();
+}
+
+function updateLiveStreakUI(){
+  const el=$("lsNum");if(!el)return;
+  el.textContent=liveStreak;
+  if(liveStreak>0){el.style.color=liveStreak>=10?"var(--grn)":liveStreak>=5?"var(--gold)":"var(--acc)";
+    el.classList.remove("pop");el.offsetHeight;el.classList.add("pop")}
+  else{el.style.color="var(--d)"}
 }
 
 function recOp(op,ok,ms){
@@ -472,60 +793,92 @@ function renderResult(){
   const avgMs=okLog.length?okLog.reduce((a,l)=>a+l.ms,0)/okLog.length:0;
   const wa=analyze();
 
-  let opHtml="";
+  let opH="";
   if(Object.keys(byOp).length){
-    opHtml=`<div class="op-rows">${Object.entries(byOp).map(([op,d])=>{
+    opH=`<div class="op-rows">${Object.entries(byOp).map(([op,d])=>{
       const p=d.t?Math.round(d.c/d.t*100):0;const ms=(d.totalMs/d.t/1000).toFixed(1);
       const col=p>90?"var(--grn)":p>75?"var(--gold)":"var(--red)";
       return`<div class="op-row"><span class="op-sym">${OP_SYM(op)}</span><div class="op-bar"><div class="op-fill" style="width:${p}%;background:${col}"></div></div><span class="op-pct">${p}%</span><span class="op-ms">${ms}s</span></div>`}).join("")}</div>`;
   }
 
-  let insH="";
-  if(wa?.insights?.[0]){const i=wa.insights[0];insH=`<div class="insight ${i.sev}"><div class="insight-icon">${{accuracy:"◎",speed:"⏱",trend:"↗"}[i.type]||"•"}</div><div class="insight-text">${i.msg}</div></div>`}
+  let insH="";if(wa?.insights?.[0]){const i=wa.insights[0];insH=`<div class="insight ${i.sev}"><div class="insight-icon">${{accuracy:"◎",speed:"⏱",trend:"↗"}[i.type]||"•"}</div><div class="insight-text">${i.msg}</div></div>`}
 
   let logH="";
-  if(log.length){logH=`<button class="log-toggle" id="logToggle">▸ View all ${log.length} problems</button><div class="log-box hide" id="logBox">${log.map(h=>`<div class="log-item" style="color:${h.ok?"var(--grn)":"var(--red)"}"><span>${h.q} = ${h.a}</span><span style="font-size:10px;opacity:.6">${h.ok?(h.ms/1000).toFixed(1)+"s":"skipped"}</span></div>`).join("")}</div>`}
+  if(log.length)logH=`<button class="log-toggle" id="logToggle">▸ View all ${log.length} problems</button><div class="log-box hide" id="logBox">${log.map(h=>`<div class="log-item" style="color:${h.ok?"var(--grn)":"var(--red)"}"><span>${h.q} = ${h.a}</span><span style="font-size:10px;opacity:.6">${h.ok?(h.ms/1000).toFixed(1)+"s":"skipped"}</span></div>`).join("")}</div>`;
+
+  const playedToday=streakData.lastDate===today();
+  const streakMsg=playedToday?`🔥 ${streakData.current} day streak!`:"";
 
   app.innerHTML=`<div class="card" style="max-width:440px">
     <div class="result-score">${score}</div><div class="result-sub">correct in ${fmt(cfg.duration)}</div>
+    ${streakMsg?`<div style="font-size:13px;color:var(--acc);margin-bottom:4px">${streakMsg}</div>`:""}
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-val">${total}</div><div class="stat-key">Attempted</div></div>
       <div class="stat-card"><div class="stat-val">${acc}%</div><div class="stat-key">Accuracy</div></div>
       <div class="stat-card"><div class="stat-val">${spd}</div><div class="stat-key">Per Min</div></div>
-      <div class="stat-card"><div class="stat-val">${(avgMs/1000).toFixed(1)}s</div><div class="stat-key">Avg Time</div></div>
+      <div class="stat-card"><div class="stat-val">${bestLiveStreak}⚡</div><div class="stat-key">Best Streak</div></div>
     </div>
-    ${opHtml}${insH}${logH}
+    ${opH}${insH}${logH}
     <button class="btn-p" id="againBtn">Play Again</button>
     <button class="btn-g" id="menuBtn">Menu</button>
   </div>`;
   $("againBtn").onclick=()=>{view="countdown";render()};
-  $("menuBtn").onclick=()=>{view="menu";render()};
+  $("menuBtn").onclick=()=>{view="menu";tab="home";render()};
   const lt=$("logToggle");if(lt)lt.onclick=()=>{logOpen=!logOpen;const lb=$("logBox");if(lb)lb.classList.toggle("hide");lt.textContent=(logOpen?"▾":"▸")+` View all ${log.length} problems`};
 }
 
-function renderProgress(){
-  if(!hist.length){app.innerHTML=`<div class="card"><h2 style="font-size:20px;font-weight:700">Progress</h2><p style="color:var(--d);font-size:13px">Complete a session to see analytics.</p><button class="btn-p" id="backBtn">Back</button></div>`;$("backBtn").onclick=()=>{view="menu";render()};return}
-  const wa=analyze();const recent=hist.slice(-40);
-  const cd=recent.map((s,i)=>({label:new Date(s.ts).toLocaleDateString("en-US",{month:"short",day:"numeric"}),score:s.score,speed:s.duration?+(s.score/(s.duration/60)).toFixed(1):0}));
-  const best=Math.max(...recent.map(s=>s.score));const avg=(recent.reduce((a,s)=>a+s.score,0)/recent.length).toFixed(1);const totalP=recent.reduce((a,s)=>a+(s.total||0),0);
-  let rdH="";if(wa)rdH=`<div class="rb" style="border-color:${wa.rc}"><div class="rb-label" style="color:${wa.rc}">${wa.rd}</div><div class="rb-sub">${hist.length} sessions · ${totalP} problems solved</div></div>`;
-  let insH="";if(wa?.insights?.length){insH=`<div class="section"><div class="s-title">INSIGHTS</div>${wa.insights.map(i=>`<div class="insight ${i.sev}"><div class="insight-icon">${{accuracy:"◎",speed:"⏱",trend:"↗"}[i.type]||"•"}</div><div class="insight-text">${i.msg}</div></div>`).join("")}</div>`}
-  let opH="";if(wa?.analysis?.length){opH=`<div class="section"><div class="s-title">ACCURACY BY OPERATION</div><div class="chart-box">${opBarsSvg(wa.analysis)}</div></div>`}
-  app.innerHTML=`<div class="card" style="max-width:480px">
-    <h2 style="font-size:20px;font-weight:700">Progress</h2>${rdH}
-    <div class="stats-grid"><div class="stat-card"><div class="stat-val">${best}</div><div class="stat-key">Best Score</div></div><div class="stat-card"><div class="stat-val">${avg}</div><div class="stat-key">Average</div></div></div>
-    ${insH}
-    <div class="section"><div class="s-title">SCORE TREND</div><div class="chart-box">${svgChart(cd,"score","#f97316",130)}</div></div>
-    <div class="section"><div class="s-title">SPEED (PER MIN)</div><div class="chart-box">${svgChart(cd,"speed","#facc15",110)}</div></div>
-    ${opH}
-    <button class="btn-p" style="margin-top:12px" id="backBtn">Back</button>
-    <button class="btn-g" style="font-size:11px;color:var(--d);border-color:var(--b);margin-top:4px" id="clearBtn">Reset Progress</button>
-  </div>`;
-  $("backBtn").onclick=()=>{view="menu";render()};
-  $("clearBtn").onclick=()=>{if(confirm("Clear all progress data?")){hist=[];saveLS("md5-h",[]);render()}};
-}
-
-render();
+// ─── Boot ───
+if(FB_READY){initAuth()}else{view="menu";render()}
 </script>
+
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║                   FIREBASE SETUP GUIDE                       ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                              ║
+║  1. Go to https://console.firebase.google.com               ║
+║  2. Click "Create a project" → name it "mathdrill"          ║
+║  3. Skip Google Analytics → Create Project                   ║
+║                                                              ║
+║  4. AUTHENTICATION:                                          ║
+║     → Build → Authentication → Get Started                   ║
+║     → Sign-in method → Enable "Email/Password"              ║
+║                                                              ║
+║  5. FIRESTORE:                                               ║
+║     → Build → Firestore Database → Create Database           ║
+║     → Start in TEST MODE (you can lock down later)           ║
+║     → Choose nearest region                                  ║
+║                                                              ║
+║  6. GET CONFIG:                                              ║
+║     → Project Settings (gear icon) → General                 ║
+║     → Scroll to "Your apps" → Click Web icon (</>)          ║
+║     → Register app (name: "mathdrill")                       ║
+║     → Copy the firebaseConfig object                         ║
+║     → Paste values into FIREBASE_CONFIG at top of <script>  ║
+║                                                              ║
+║  7. FIRESTORE RULES (optional, for security):                ║
+║     → Firestore → Rules → Replace with:                      ║
+║                                                              ║
+║     rules_version = '2';                                     ║
+║     service cloud.firestore {                                ║
+║       match /databases/{db}/documents {                      ║
+║         match /users/{userId}/{document=**} {                ║
+║           allow read: if request.auth != null;               ║
+║           allow write: if request.auth.uid == userId;        ║
+║         }                                                    ║
+║         match /users/{userId} {                              ║
+║           allow read: if request.auth != null;               ║
+║           allow write: if request.auth.uid == userId;        ║
+║         }                                                    ║
+║       }                                                      ║
+║     }                                                        ║
+║                                                              ║
+║  8. Deploy to GitHub Pages and open on iPhone!               ║
+║                                                              ║
+║  Without Firebase config, the app works fully offline         ║
+║  with localStorage — just no accounts or multiplayer.        ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+-->
 </body>
 </html>
