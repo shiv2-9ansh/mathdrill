@@ -3,334 +3,459 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>QuantDrill | High-Frequency</title>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap');
-:root {
-    --bg: #050505; --card: #111; --acc: #f97316; --text: #fafafa;
-    --dim: #52525b; --err: #ef4444; --suc: #22c55e; --blue: #3b82f6; --font: 'JetBrains Mono', monospace;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100vh; overflow: hidden; }
+<title>QuantDrill Pro</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-/* Layout */
-#app { height: 100%; display: flex; flex-direction: column; }
-.nav { display: flex; background: var(--card); border-top: 1px solid #222; padding-bottom: env(safe-area-inset-bottom); }
-.nav-item { flex: 1; padding: 16px; text-align: center; font-size: 10px; color: var(--dim); cursor: pointer; font-weight: 800; }
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+:root {
+  --bg: #0a0a0b;
+  --card: #161618;
+  --card-border: #27272a;
+  --acc: #fbbf24;
+  --acc-dim: rgba(251, 191, 36, 0.1);
+  --text: #f4f4f5;
+  --text-dim: #71717a;
+  --err: #ef4444;
+  --suc: #10b981;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --safe-top: env(safe-area-inset-top, 20px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Layout Systems --- */
+#app { flex: 1; display: flex; flex-direction: column; padding-top: var(--safe-top); }
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  overflow-y: auto;
+  opacity: 1;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.screen.hide { display: none; opacity: 0; transform: translateY(10px); }
+
+/* --- Components --- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.btn {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  border: none;
+  border-radius: 14px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn:active { transform: scale(0.97); filter: brightness(1.2); }
+.btn-p { background: var(--acc); color: #000; font-size: 16px; }
+.btn-s { background: var(--card); border: 1px solid var(--card-border); color: var(--text); }
+
+/* --- Nav Bar --- */
+.nav {
+  background: rgba(10, 10, 11, 0.8);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+}
+
+.nav-item {
+  flex: 1;
+  padding: 16px 0;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+}
+
 .nav-item.active { color: var(--acc); }
 
-.screen { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; padding-top: env(safe-area-inset-top); }
+/* --- Game Screen --- */
+.game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+.timer-pill { background: var(--acc-dim); color: var(--acc); padding: 6px 14px; border-radius: 20px; font-family: var(--font-mono); font-weight: 700; font-size: 18px; }
+
+.q-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.q-text { font-family: var(--font-mono); font-size: 52px; font-weight: 700; margin-bottom: 12px; letter-spacing: -2px; }
+.a-input { font-family: var(--font-mono); font-size: 60px; color: var(--acc); border-bottom: 3px solid var(--card-border); min-width: 200px; text-align: center; min-height: 80px; }
+.a-input.err { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; color: var(--err); border-color: var(--err); }
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* --- Numpad --- */
+.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--card-border); margin-top: auto; }
+.key { background: var(--bg); color: var(--text); font-family: var(--font-mono); font-size: 26px; padding: 24px 0; text-align: center; }
+.key:active { background: var(--card); }
+.key.action { color: var(--text-dim); }
+.key.enter { background: var(--acc); color: #000; grid-column: span 2; font-weight: 800; }
+
+/* --- Analytics UI --- */
+.bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.bar-label { width: 45px; font-size: 11px; font-weight: 700; color: var(--text-dim); }
+.bar-track { flex: 1; height: 8px; background: var(--card-border); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--acc); border-radius: 4px; transition: width 0.6s ease-out; }
+.bar-val { width: 50px; font-size: 11px; font-family: var(--font-mono); text-align: right; }
+
+.heat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.heat-item { border-radius: 12px; padding: 12px; text-align: center; border: 1px solid var(--card-border); }
+.heat-item span { display: block; font-size: 9px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px; }
+.heat-item b { font-family: var(--font-mono); font-size: 16px; }
+
+/* --- Practice Toggles --- */
+.toggle-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.chip { 
+    background: var(--card); border: 1px solid var(--card-border); color: var(--text-dim); 
+    padding: 10px 18px; border-radius: 30px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.chip.active { background: var(--acc-dim); border-color: var(--acc); color: var(--acc); }
+
 .hide { display: none !important; }
-
-/* Cards & Components */
-.card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #222; }
-.btn { width: 100%; padding: 16px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; font-family: var(--font); margin-top: 8px; font-size: 14px; }
-.btn-p { background: var(--acc); color: #000; }
-.btn-s { background: #1a1a1a; color: var(--text); }
-
-/* Analytics Elements */
-.lat-bar-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.lat-label { width: 40px; font-size: 10px; color: var(--dim); text-transform: uppercase; }
-.lat-bar-bg { flex: 1; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
-.lat-bar-fill { height: 100%; background: var(--blue); border-radius: 4px; }
-.lat-val { width: 45px; font-size: 10px; text-align: right; font-weight: 700; }
-
-/* Game UI */
-.q-text { font-size: 44px; font-weight: 800; text-align: center; margin: 40px 0 10px; letter-spacing: -1px; }
-.a-input { font-size: 50px; color: var(--acc); font-weight: 800; text-align: center; border-bottom: 2px solid #222; min-height: 65px; margin-bottom: 20px; }
-.a-input.wrong { color: var(--err); animation: shake 0.2s 2; }
-@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
-
-.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #222; margin-top: auto; padding-bottom: env(safe-area-inset-bottom); }
-.key { background: var(--bg); padding: 22px; font-size: 24px; font-weight: 600; text-align: center; cursor: pointer; }
-.key:active { background: #111; }
-.key.ent { background: var(--acc); color: #000; grid-column: span 2; font-weight: 800; }
-
-.badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: #222; color: var(--dim); vertical-align: middle; }
 </style>
 </head>
 <body>
 
 <div id="app">
     <!-- DASHBOARD -->
-    <div id="screen-home" class="screen">
-        <h2 style="margin-bottom:15px">QUANTDRILL <span class="badge">PRO</span></h2>
-        <div class="card">
-            <p style="font-size:10px; color:var(--dim)">CURRENT RANK</p>
-            <h1 id="rank-display" style="color:var(--acc); margin-bottom:10px">ANALYZING...</h1>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
-                <div class="btn-s" style="padding:10px; border-radius:8px">
-                    <p style="font-size:9px; color:var(--dim)">TOTAL SOLVED</p>
-                    <p id="stat-solved" style="font-weight:800">0</p>
-                </div>
-                <div class="btn-s" style="padding:10px; border-radius:8px">
-                    <p style="font-size:9px; color:var(--dim)">AVG LATENCY</p>
-                    <p id="stat-lat" style="font-weight:800">0.0s</p>
-                </div>
+    <div id="scr-home" class="screen">
+        <div style="margin-bottom: 24px;">
+            <p style="color: var(--text-dim); font-size: 14px; font-weight: 600;">Welcome back,</p>
+            <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;" id="rank-name">TRAINEE</h1>
+        </div>
+
+        <div class="card stat-grid">
+            <div>
+                <p style="font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase;">Total Solved</p>
+                <p style="font-size: 24px; font-weight: 800; font-family: var(--font-mono);" id="stat-total">0</p>
+            </div>
+            <div>
+                <p style="font-size: 11px; color: var(--text-dim); font-weight: 700; text-transform: uppercase;">Avg Latency</p>
+                <p style="font-size: 24px; font-weight: 800; font-family: var(--font-mono); color: var(--suc);" id="stat-avg-lat">0.0s</p>
             </div>
         </div>
-        <button class="btn btn-p" onclick="startDrill('optiver')">OPTIVER 80/8</button>
-        <button class="btn btn-s" onclick="switchTab('practice')">PRACTICE LAB</button>
+
+        <h3 style="font-size: 13px; color: var(--text-dim); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;">Quick Actions</h3>
+        <button class="btn btn-p" onclick="startSession('optiver')">
+            OPTIVER 80/8 TEST
+        </button>
+        <button class="btn btn-s" style="margin-top: 10px;" onclick="switchTab('practice')">
+            PRACTICE LAB
+        </button>
     </div>
 
     <!-- ANALYTICS -->
-    <div id="screen-analytics" class="screen hide">
-        <h2 style="margin-bottom:15px">PERFORMANCE DEEP-DIVE</h2>
+    <div id="scr-analytics" class="screen hide">
+        <h2 style="margin-bottom: 20px;">Performance Profile</h2>
         
         <div class="card">
-            <p style="font-size:10px; color:var(--dim); margin-bottom:10px">LATENCY BY OPERATION (SECONDS)</p>
-            <div id="latency-bars">
-                <!-- Bars injected here -->
-            </div>
+            <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 16px; font-weight: 700; text-transform: uppercase;">Latency per Operation (sec)</p>
+            <div id="latency-bars"></div>
         </div>
 
         <div class="card">
-            <p style="font-size:10px; color:var(--dim); margin-bottom:10px">ACCURACY HEATMAP</p>
-            <div id="heatmap" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px"></div>
+            <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 16px; font-weight: 700; text-transform: uppercase;">Accuracy Heatmap</p>
+            <div id="accuracy-heat" class="heat-grid"></div>
         </div>
 
-        <button class="btn btn-s" style="color:var(--err)" onclick="resetData()">WIPE DATA</button>
+        <button class="btn btn-s" onclick="resetAllData()" style="color: var(--err); border-color: rgba(239, 68, 68, 0.2);">RESET ALL PROGRESS</button>
     </div>
 
     <!-- PRACTICE -->
-    <div id="screen-practice" class="screen hide">
-        <h2>PRACTICE LAB</h2>
-        <p style="font-size:11px; color:var(--dim); margin: 10px 0;">TARGET SPECIFIC WEAKNESSES</p>
+    <div id="scr-practice" class="screen hide">
+        <h2 style="margin-bottom: 8px;">Practice Lab</h2>
+        <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 24px;">Refine specific mathematical operators.</p>
         
-        <div id="op-toggles" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px">
+        <div class="toggle-group" id="op-selectors">
             <!-- Toggles injected here -->
         </div>
 
-        <button class="btn btn-p" onclick="startDrill('custom')">START SESSION</button>
-        <button class="btn btn-s" onclick="startDrill('weakness')" style="border:1px solid var(--blue); color:var(--blue)">DRILL SLOWEST OPS</button>
+        <div class="card" style="background: var(--acc-dim); border-color: var(--acc);">
+            <p style="font-size: 12px; color: var(--acc); font-weight: 700; margin-bottom: 4px;">RECOMMENDED</p>
+            <p style="font-size: 14px; line-height: 1.4;">Based on your latency, you should focus on <b>Multiplication</b> today.</p>
+        </div>
+
+        <button class="btn btn-p" style="margin-top: auto;" onclick="startSession('custom')">START DRILL</button>
+        <button class="btn btn-s" style="margin-top: 10px; border-color: var(--suc); color: var(--suc);" onclick="startSession('weakness')">DRILL WEAKNESSES</button>
     </div>
 
     <!-- GAME -->
-    <div id="screen-game" class="screen hide" style="padding:0">
-        <div style="padding:20px">
-            <div style="display:flex; justify-content:space-between; align-items:center">
-                <p id="timer" style="font-weight:800; color:var(--acc)">8:00</p>
-                <p id="score" style="font-weight:800">0</p>
+    <div id="scr-game" class="screen hide" style="padding: 0; background: var(--bg);">
+        <div style="padding: 24px; flex: 1; display: flex; flex-direction: column;">
+            <div class="game-header">
+                <div class="timer-pill" id="game-timer">8:00</div>
+                <div style="text-align: right;">
+                    <p style="font-size: 10px; color: var(--text-dim); font-weight: 800;">SCORE</p>
+                    <p style="font-size: 24px; font-weight: 800; font-family: var(--font-mono);" id="game-score">0</p>
+                </div>
             </div>
-            <div class="q-text" id="q-text">--</div>
-            <div class="a-input" id="a-input"></div>
+
+            <div class="q-container">
+                <p id="game-q" class="q-text">--</p>
+                <div id="game-a" class="a-input"></div>
+                <p id="game-type" style="margin-top: 20px; font-size: 11px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase;"></p>
+            </div>
         </div>
+
         <div class="numpad">
-            <div class="key" onclick="press('1')">1</div><div class="key" onclick="press('2')">2</div><div class="key" onclick="press('3')">3</div>
-            <div class="key" onclick="press('4')">4</div><div class="key" onclick="press('5')">5</div><div class="key" onclick="press('6')">6</div>
-            <div class="key" onclick="press('7')">7</div><div class="key" onclick="press('8')">8</div><div class="key" onclick="press('9')">9</div>
-            <div class="key" onclick="press('.')">.</div><div class="key" onclick="press('0')">0</div><div class="key" onclick="press('DEL')">DEL</div>
-            <div class="key ent" onclick="press('ENT')">SUBMIT</div>
+            <div class="key" onclick="kp('1')">1</div><div class="key" onclick="kp('2')">2</div><div class="key" onclick="kp('3')">3</div>
+            <div class="key" onclick="kp('4')">4</div><div class="key" onclick="kp('5')">5</div><div class="key" onclick="kp('6')">6</div>
+            <div class="key" onclick="kp('7')">7</div><div class="key" onclick="kp('8')">8</div><div class="key" onclick="kp('9')">9</div>
+            <div class="key action" onclick="kp('.')">.</div><div class="key" onclick="kp('0')">0</div><div class="key action" onclick="kp('DEL')">⌫</div>
+            <div class="key enter" onclick="kp('ENT')">SUBMIT</div>
         </div>
     </div>
 
-    <div class="nav" id="main-nav">
-        <div class="nav-item active" onclick="switchTab('home')">DASHBOARD</div>
-        <div class="nav-item" onclick="switchTab('analytics')">ANALYTICS</div>
-        <div class="nav-item" onclick="switchTab('practice')">PRACTICE</div>
-    </div>
+    <!-- NAVIGATION -->
+    <nav class="nav" id="app-nav">
+        <div class="nav-item active" onclick="switchTab('home')">Home</div>
+        <div class="nav-item" onclick="switchTab('analytics')">Analytics</div>
+        <div class="nav-item" onclick="switchTab('practice')">Practice</div>
+    </nav>
 </div>
 
 <script>
 "use strict";
 
-// --- Data Model ---
-const INITIAL_STATS = {
-    totalSolved: 0,
-    history: [], // {ts, score, type}
-    ops: {
-        add: {c:0, t:0, totalMs: 0},
-        sub: {c:0, t:0, totalMs: 0},
-        mul: {c:0, t:0, totalMs: 0},
-        div: {c:0, t:0, totalMs: 0},
-        pct: {c:0, t:0, totalMs: 0},
-        sq:  {c:0, t:0, totalMs: 0}
-    }
+// --- Database Configuration ---
+const OPS_INIT = {
+    add: {c:0, t:0, ms:0}, sub: {c:0, t:0, ms:0}, mul: {c:0, t:0, ms:0}, 
+    div: {c:0, t:0, ms:0}, pct: {c:0, t:0, ms:0}, sq: {c:0, t:0, ms:0}
 };
 
-let stats = JSON.parse(localStorage.getItem('qd_pro_v4')) || INITIAL_STATS;
+let db = JSON.parse(localStorage.getItem('qd_v5_pro')) || {
+    history: [],
+    stats: JSON.parse(JSON.stringify(OPS_INIT))
+};
+
+const saveDB = () => localStorage.setItem('qd_v5_pro', JSON.stringify(db));
+
+// --- Global State ---
 let activeOps = ['add', 'sub', 'mul', 'div'];
-let game = { active: false, timer: null, currentProb: null };
+let game = { active: false, score: 0, time: 0, current: null };
 
-const save = () => localStorage.setItem('qd_pro_v4', JSON.stringify(stats));
-
-// --- Math Engine ---
+// --- Logic Engines ---
 function generateProblem() {
-    let opPool = activeOps;
-    
-    // If in weakness drill, only pick from ops with latency > 3s or accuracy < 80%
-    if (game.type === 'weakness') {
-        opPool = Object.keys(stats.ops).filter(o => {
-            const avg = stats.ops[o].t ? (stats.ops[o].totalMs / stats.ops[o].t) / 1000 : 0;
-            return avg > 2.5 || (stats.ops[o].t > 0 && stats.ops[o].c / stats.ops[o].t < 0.85);
-        });
-        if (opPool.length === 0) opPool = activeOps;
+    let pool = activeOps;
+    if(game.type === 'weakness') {
+        // Find op with highest average latency
+        pool = [Object.keys(db.stats).reduce((a, b) => {
+            const latA = db.stats[a].t ? db.stats[a].ms / db.stats[a].t : 0;
+            const latB = db.stats[b].t ? db.stats[b].ms / db.stats[b].t : 0;
+            return latA > latB ? a : b;
+        })];
     }
 
-    const op = opPool[Math.floor(Math.random() * opPool.length)];
+    const op = pool[Math.floor(Math.random() * pool.length)];
     let a, b, ans, txt;
 
     switch(op) {
         case 'add': a=rand(10,99); b=rand(10,99); ans=a+b; txt=`${a}+${b}`; break;
-        case 'sub': a=rand(20,150); b=rand(10,a); ans=a-b; txt=`${a}-${b}`; break;
-        case 'mul': a=rand(2,16); b=rand(2,20); ans=a*b; txt=`${a}×${b}`; break;
-        case 'div': b=rand(2,12); ans=rand(2,15); a=b*ans; txt=`${a}÷${b}`; break;
-        case 'pct': a=[5,10,15,20,25,50][Math.floor(Math.random()*6)]; b=rand(1,20)*20; ans=(a/100)*b; txt=`${a}% of ${b}`; break;
-        case 'sq': a=rand(2,25); ans=a*a; txt=`${a}²`; break;
+        case 'sub': a=rand(20,160); b=rand(10,a); ans=a-b; txt=`${a}-${b}`; break;
+        case 'mul': a=rand(2,16); b=rand(2,22); ans=a*b; txt=`${a}×${b}`; break;
+        case 'div': b=rand(2,13); ans=rand(2,16); a=b*ans; txt=`${a}÷${b}`; break;
+        case 'pct': a=[5,10,15,20,25,50,75].pick(); b=rand(1,20)*20; ans=(a/100)*b; txt=`${a}% of ${b}`; break;
+        case 'sq': a=rand(2,26); ans=a*a; txt=`${a}²`; break;
     }
     return { op, txt, ans, start: Date.now() };
 }
 
 const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+Array.prototype.pick = function() { return this[Math.floor(Math.random() * this.length)]; };
 
-// --- UI Logic ---
+// --- View Rendering ---
 function switchTab(tab) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hide'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById(`screen-${tab}`).classList.remove('hide');
-    event?.target.classList?.add('active');
+    document.getElementById(`scr-${tab}`).classList.remove('hide');
     
+    const targetNav = Array.from(document.querySelectorAll('.nav-item')).find(n => n.innerText.toLowerCase() === tab);
+    if(targetNav) targetNav.classList.add('active');
+
     if (tab === 'home') renderHome();
     if (tab === 'analytics') renderAnalytics();
     if (tab === 'practice') renderPractice();
 }
 
 function renderHome() {
-    const solved = Object.values(stats.ops).reduce((a,b) => a + b.c, 0);
-    const totalMs = Object.values(stats.ops).reduce((a,b) => a + b.totalMs, 0);
-    const avgLat = solved ? (totalMs / solved / 1000).toFixed(2) : "0.00";
+    const solved = Object.values(db.stats).reduce((a, b) => a + b.c, 0);
+    const ms = Object.values(db.stats).reduce((a, b) => a + b.ms, 0);
+    const avg = solved ? (ms / solved / 1000).toFixed(2) : "0.00";
     
-    document.getElementById('stat-solved').innerText = solved;
-    document.getElementById('stat-lat').innerText = avgLat + "s";
+    document.getElementById('stat-total').innerText = solved;
+    document.getElementById('stat-avg-lat').innerText = avg + "s";
     
-    let rank = "TRAINEE";
+    let rank = "TRAINEE RESEARCHER";
     if (solved > 50) rank = "JUNIOR TRADER";
-    if (solved > 250 && avgLat < 2.5) rank = "ASSOCIATE TRADER";
-    if (solved > 700 && avgLat < 1.8) rank = "MARKET MAKER";
-    document.getElementById('rank-display').innerText = rank;
+    if (solved > 250 && avg < 2.5) rank = "QUANTITATIVE ANALYST";
+    if (solved > 800 && avg < 1.7) rank = "MARKET MAKER";
+    document.getElementById('rank-name').innerText = rank;
 }
 
 function renderAnalytics() {
-    const container = document.getElementById('latency-bars');
-    const heatmap = document.getElementById('heatmap');
-    container.innerHTML = ""; heatmap.innerHTML = "";
+    const barBox = document.getElementById('latency-bars');
+    const heatBox = document.getElementById('accuracy-heat');
+    barBox.innerHTML = ""; heatBox.innerHTML = "";
 
-    Object.entries(stats.ops).forEach(([name, data]) => {
-        const avg = data.t ? (data.totalMs / data.t / 1000) : 0;
+    Object.entries(db.stats).forEach(([name, data]) => {
+        const avg = data.t ? (data.ms / data.t / 1000) : 0;
         const acc = data.t ? (data.c / data.t) : 0;
 
-        // Latency Bars
-        const width = Math.min(avg * 20, 100); // Scale 5 seconds to 100%
-        container.innerHTML += `
-            <div class="lat-bar-container">
-                <div class="lat-label">${name}</div>
-                <div class="lat-bar-bg"><div class="lat-bar-fill" style="width:${width}%; background:${avg > 3 ? 'var(--err)' : 'var(--blue)'}"></div></div>
-                <div class="lat-val">${avg.toFixed(2)}s</div>
+        // Bars
+        const width = Math.min(avg * 20, 100);
+        barBox.innerHTML += `
+            <div class="bar-row">
+                <div class="bar-label">${name.toUpperCase()}</div>
+                <div class="bar-track"><div class="bar-fill" style="width:${width}%; background:${avg > 3 ? 'var(--err)' : 'var(--acc)'}"></div></div>
+                <div class="bar-val">${avg.toFixed(2)}s</div>
             </div>`;
         
         // Heatmap
-        const color = data.t === 0 ? '#111' : acc > 0.9 ? 'var(--suc)' : acc > 0.7 ? 'var(--acc)' : 'var(--err)';
-        heatmap.innerHTML += `<div style="background:${color}; padding:10px; border-radius:8px; text-align:center; font-size:10px; color:#000; font-weight:800">${name.toUpperCase()}<br>${Math.round(acc*100)}%</div>`;
+        const color = data.t === 0 ? 'var(--card)' : acc > 0.9 ? 'var(--suc)' : acc > 0.7 ? 'var(--acc)' : 'var(--err)';
+        heatBox.innerHTML += `
+            <div class="heat-item" style="border-color:${color}44">
+                <span>${name}</span>
+                <b style="color:${color}">${Math.round(acc*100)}%</b>
+            </div>`;
     });
 }
 
 function renderPractice() {
-    const grid = document.getElementById('op-toggles');
-    grid.innerHTML = "";
-    Object.keys(INITIAL_STATS.ops).forEach(op => {
-        const isOn = activeOps.includes(op);
-        grid.innerHTML += `<div class="btn-s ${isOn?'':'hide-op'}" style="padding:15px; border:1px solid ${isOn?'var(--acc)':'#222'}" onclick="toggleOp('${op}')">${op.toUpperCase()}</div>`;
+    const container = document.getElementById('op-selectors');
+    container.innerHTML = "";
+    Object.keys(OPS_INIT).forEach(op => {
+        const active = activeOps.includes(op);
+        const chip = document.createElement('div');
+        chip.className = `chip ${active ? 'active' : ''}`;
+        chip.innerText = op.toUpperCase();
+        chip.onclick = () => {
+            if(activeOps.includes(op)) activeOps = activeOps.filter(o => o !== op);
+            else activeOps.push(op);
+            renderPractice();
+        };
+        container.appendChild(chip);
     });
 }
 
-function toggleOp(op) {
-    if (activeOps.includes(op)) activeOps = activeOps.filter(o => o !== op);
-    else activeOps.push(op);
-    renderPractice();
-}
-
 // --- Game Loop ---
-function startDrill(type) {
+function startSession(type) {
     game = { active: true, type, score: 0, timeLeft: type === 'optiver' ? 480 : 120 };
-    document.getElementById('screen-game').classList.remove('hide');
-    document.getElementById('main-nav').classList.add('hide');
+    document.getElementById('scr-game').classList.remove('hide');
+    document.getElementById('app-nav').classList.add('hide');
     nextQ();
     
     game.timer = setInterval(() => {
         game.timeLeft--;
         const m = Math.floor(game.timeLeft / 60);
         const s = game.timeLeft % 60;
-        document.getElementById('timer').innerText = `${m}:${s.toString().padStart(2, '0')}`;
-        if (game.timeLeft <= 0) endGame();
+        document.getElementById('game-timer').innerText = `${m}:${s.toString().padStart(2, '0')}`;
+        if (game.timeLeft <= 0) exitGame();
     }, 1000);
 }
 
 function nextQ() {
-    game.currentProb = generateProblem();
-    document.getElementById('q-text').innerText = game.currentProb.txt;
-    document.getElementById('a-input').innerText = "";
-    document.getElementById('score').innerText = game.score;
+    game.current = generateProblem();
+    document.getElementById('game-q').innerText = game.current.txt;
+    document.getElementById('game-a').innerText = "";
+    document.getElementById('game-score').innerText = game.score;
+    document.getElementById('game-type').innerText = game.type === 'optiver' ? 'Optiver Standard' : 'Practice Drill';
 }
 
-function press(key) {
-    const div = document.getElementById('a-input');
-    if (key === 'DEL') div.innerText = div.innerText.slice(0, -1);
-    else if (key === 'ENT') submit();
-    else if (div.innerText.length < 8) div.innerText += key;
+function kp(k) {
+    const el = document.getElementById('game-a');
+    if (k === 'DEL') el.innerText = el.innerText.slice(0, -1);
+    else if (k === 'ENT') validate();
+    else if (el.innerText.length < 8) el.innerText += k;
 }
 
-function submit() {
-    const val = parseFloat(document.getElementById('a-input').innerText);
-    const correct = Math.abs(val - game.currentProb.ans) < 0.01;
-    const latency = Date.now() - game.currentProb.start;
+function validate() {
+    const el = document.getElementById('game-a');
+    const val = parseFloat(el.innerText);
+    const correct = Math.abs(val - game.current.ans) < 0.01;
+    const latency = Date.now() - game.current.start;
 
-    // Update Global Stats
-    const op = game.currentProb.op;
-    stats.ops[op].t++;
+    const op = game.current.op;
+    db.stats[op].t++;
+    
     if (correct) {
-        stats.ops[op].c++;
-        stats.ops[op].totalMs += latency;
+        db.stats[op].c++;
+        db.stats[op].ms += latency;
         game.score++;
         nextQ();
     } else {
-        if (game.type === 'optiver') { game.score -= 2; nextQ(); }
-        else {
-            const input = document.getElementById('a-input');
-            input.classList.add('wrong');
-            setTimeout(() => { input.classList.remove('wrong'); input.innerText = ""; }, 200);
+        if (game.type === 'optiver') {
+            game.score -= 2;
+            nextQ();
+        } else {
+            el.classList.add('err');
+            setTimeout(() => { el.classList.remove('err'); el.innerText = ""; }, 300);
         }
     }
-    save();
+    saveDB();
 }
 
-function endGame() {
+function exitGame() {
     clearInterval(game.timer);
-    stats.history.push({ score: game.score, type: game.type, ts: Date.now() });
-    save();
-    document.getElementById('screen-game').classList.add('hide');
-    document.getElementById('main-nav').classList.remove('hide');
+    db.history.push({ score: game.score, ts: Date.now() });
+    saveDB();
+    document.getElementById('scr-game').classList.add('hide');
+    document.getElementById('app-nav').classList.remove('hide');
     switchTab('home');
 }
 
-function resetData() {
-    if(confirm("Erase all progress?")) {
-        stats = INITIAL_STATS;
-        save();
+function resetAllData() {
+    if(confirm("Permanently wipe all quant analytics and progress?")) {
+        db = { history: [], stats: JSON.parse(JSON.stringify(OPS_INIT)) };
+        saveDB();
         location.reload();
     }
 }
 
-// Global listeners
+// Global Key Listeners for Desktop
 window.addEventListener('keydown', e => {
-    if (e.key >= '0' && e.key <= '9' || e.key === '.') press(e.key);
-    if (e.key === 'Enter') press('ENT');
-    if (e.key === 'Backspace') press('DEL');
+    if (e.key >= '0' && e.key <= '9' || e.key === '.') kp(e.key);
+    if (e.key === 'Enter') kp('ENT');
+    if (e.key === 'Backspace') kp('DEL');
 });
 
-// Boot
+// Initialization
 renderHome();
 </script>
 </body>
