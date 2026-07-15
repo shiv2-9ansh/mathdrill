@@ -3,313 +3,335 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>QuantDrill Elite</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>QuantDrill | High-Frequency</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap');
 :root {
-  --bg: #050505;
-  --card: #111111;
-  --acc: #f97316;
-  --text: #ffffff;
-  --dim: #71717a;
-  --err: #ef4444;
-  --suc: #22c55e;
-  --font: 'JetBrains Mono', monospace;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --bg: #050505; --card: #111; --acc: #f97316; --text: #fafafa;
+    --dim: #52525b; --err: #ef4444; --suc: #22c55e; --blue: #3b82f6; --font: 'JetBrains Mono', monospace;
 }
-
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { 
-    background: var(--bg); color: var(--text); font-family: var(--font); 
-    height: 100vh; overflow: hidden; display: flex; flex-direction: column;
-}
+body { background: var(--bg); color: var(--text); font-family: var(--font); height: 100vh; overflow: hidden; }
 
-/* --- UI Architecture --- */
-#app { flex: 1; display: flex; flex-direction: column; padding-top: var(--safe-top); }
+/* Layout */
+#app { height: 100%; display: flex; flex-direction: column; }
+.nav { display: flex; background: var(--card); border-top: 1px solid #222; padding-bottom: env(safe-area-inset-bottom); }
+.nav-item { flex: 1; padding: 16px; text-align: center; font-size: 10px; color: var(--dim); cursor: pointer; font-weight: 800; }
+.nav-item.active { color: var(--acc); }
 
-.screen { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; animation: fadeIn 0.3s ease; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-.header { width: 100%; display: flex; justify-content: space-between; padding: 10px 20px; }
-.brand { font-size: 24px; font-weight: 800; letter-spacing: -1.5px; background: linear-gradient(to right, #facc15, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
-/* --- Game Elements --- */
-.problem-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
-.q-text { font-size: 56px; font-weight: 800; text-align: center; margin-bottom: 10px; transition: transform 0.1s; }
-.a-input { font-size: 64px; color: var(--acc); font-weight: 700; min-height: 80px; border-bottom: 2px solid #222; min-width: 200px; text-align: center; }
-.a-input.wrong { color: var(--err); animation: shake 0.2s 2; }
-.est-tag { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
-
-@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
-
-/* --- Numpad Elite --- */
-.numpad { 
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; 
-    background: #222; border-top: 1px solid #222; padding-bottom: var(--safe-bottom);
-}
-.key { 
-    background: var(--bg); padding: 25px 0; font-size: 28px; font-weight: 600; 
-    display: flex; justify-content: center; align-items: center; cursor: pointer;
-}
-.key:active { background: #111; }
-.key.spec { color: var(--dim); font-size: 18px; }
-.key.enter { background: var(--acc); color: #000; font-weight: 800; grid-column: span 2; }
-
-/* --- Progress Tracking --- */
-.progress-container { width: 100%; height: 4px; background: #111; position: relative; }
-.progress-bar { height: 100%; background: var(--acc); transition: width 0.3s; }
-.streak-counter { font-size: 14px; font-weight: 700; color: var(--acc); }
-
-/* --- Menu & Stats --- */
-.menu-card { background: var(--card); border-radius: 20px; padding: 25px; width: 100%; max-width: 360px; margin-top: 20px; border: 1px solid #222; }
-.stat-row { display: flex; justify-content: space-between; margin-bottom: 15px; }
-.btn { width: 100%; padding: 18px; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; font-family: var(--font); margin-top: 10px; }
-.btn-primary { background: var(--acc); color: #000; }
-.btn-outline { background: transparent; border: 1px solid #333; color: var(--text); }
-
-.badge { font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 800; }
-.badge-optiver { background: #1e40af; color: #fff; }
-
+.screen { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow-y: auto; padding-top: env(safe-area-inset-top); }
 .hide { display: none !important; }
+
+/* Cards & Components */
+.card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #222; }
+.btn { width: 100%; padding: 16px; border-radius: 10px; font-weight: 800; border: none; cursor: pointer; font-family: var(--font); margin-top: 8px; font-size: 14px; }
+.btn-p { background: var(--acc); color: #000; }
+.btn-s { background: #1a1a1a; color: var(--text); }
+
+/* Analytics Elements */
+.lat-bar-container { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.lat-label { width: 40px; font-size: 10px; color: var(--dim); text-transform: uppercase; }
+.lat-bar-bg { flex: 1; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
+.lat-bar-fill { height: 100%; background: var(--blue); border-radius: 4px; }
+.lat-val { width: 45px; font-size: 10px; text-align: right; font-weight: 700; }
+
+/* Game UI */
+.q-text { font-size: 44px; font-weight: 800; text-align: center; margin: 40px 0 10px; letter-spacing: -1px; }
+.a-input { font-size: 50px; color: var(--acc); font-weight: 800; text-align: center; border-bottom: 2px solid #222; min-height: 65px; margin-bottom: 20px; }
+.a-input.wrong { color: var(--err); animation: shake 0.2s 2; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+.numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #222; margin-top: auto; padding-bottom: env(safe-area-inset-bottom); }
+.key { background: var(--bg); padding: 22px; font-size: 24px; font-weight: 600; text-align: center; cursor: pointer; }
+.key:active { background: #111; }
+.key.ent { background: var(--acc); color: #000; grid-column: span 2; font-weight: 800; }
+
+.badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: #222; color: var(--dim); vertical-align: middle; }
 </style>
 </head>
 <body>
 
 <div id="app">
-    <!-- Menu Screen -->
-    <div id="menuScreen" class="screen">
-        <div class="brand">QuantDrill Elite</div>
-        <div class="menu-card">
-            <div class="stat-row">
-                <div><p style="font-size:10px; color:var(--dim)">TOTAL SOLVED</p><p id="totalSolved" class="stat-val">0</p></div>
-                <div><p style="font-size:10px; color:var(--dim)">TRADER RANK</p><p id="traderRank" style="color:var(--acc)">Trainee</p></div>
-            </div>
-            <button class="btn btn-primary" onclick="initGame('standard')">Standard Drill (2m)</button>
-            <button class="btn btn-outline" onclick="initGame('optiver')">Optiver 80 in 8 <span class="badge badge-optiver">PRO</span></button>
-            <button class="btn btn-outline" style="margin-top:20px" onclick="resetStats()">Reset Analytics</button>
-        </div>
-    </div>
-
-    <!-- Game Screen -->
-    <div id="gameScreen" class="screen hide">
-        <div class="progress-container"><div id="pBar" class="progress-bar"></div></div>
-        <div class="header">
-            <div><p class="stat-label">TIME</p><p id="timer" class="stat-val">--:--</p></div>
-            <div style="text-align:right"><p class="stat-label">STREAK</p><p id="streak" class="streak-counter">0</p></div>
-        </div>
-        
-        <div class="problem-box">
-            <div id="estMode" class="est-tag hide">Estimation (±5%)</div>
-            <div id="qText" class="q-text">--</div>
-            <div id="aInput" class="a-input"></div>
-        </div>
-
-        <div class="numpad" style="width:100%">
-            <div class="key" onclick="handleInput('1')">1</div>
-            <div class="key" onclick="handleInput('2')">2</div>
-            <div class="key" onclick="handleInput('3')">3</div>
-            <div class="key" onclick="handleInput('4')">4</div>
-            <div class="key" onclick="handleInput('5')">5</div>
-            <div class="key" onclick="handleInput('6')">6</div>
-            <div class="key" onclick="handleInput('7')">7</div>
-            <div class="key" onclick="handleInput('8')">8</div>
-            <div class="key" onclick="handleInput('9')">9</div>
-            <div class="key spec" onclick="handleInput('-')">-</div>
-            <div class="key" onclick="handleInput('0')">0</div>
-            <div class="key spec" onclick="handleInput('.')">.</div>
-            <div class="key spec" onclick="handleInput('DEL')">DEL</div>
-            <div class="key enter" onclick="handleInput('ENT')">SUBMIT</div>
-        </div>
-    </div>
-
-    <!-- Results Screen -->
-    <div id="resultScreen" class="screen hide">
-        <div class="brand">Drill Summary</div>
-        <div class="menu-card">
-            <div class="stat-row">
-                <div style="text-align:center; width:100%">
-                    <p style="font-size:12px; color:var(--dim)">FINAL SCORE</p>
-                    <p id="finalScore" style="font-size:64px; font-weight:800">0</p>
+    <!-- DASHBOARD -->
+    <div id="screen-home" class="screen">
+        <h2 style="margin-bottom:15px">QUANTDRILL <span class="badge">PRO</span></h2>
+        <div class="card">
+            <p style="font-size:10px; color:var(--dim)">CURRENT RANK</p>
+            <h1 id="rank-display" style="color:var(--acc); margin-bottom:10px">ANALYZING...</h1>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+                <div class="btn-s" style="padding:10px; border-radius:8px">
+                    <p style="font-size:9px; color:var(--dim)">TOTAL SOLVED</p>
+                    <p id="stat-solved" style="font-weight:800">0</p>
+                </div>
+                <div class="btn-s" style="padding:10px; border-radius:8px">
+                    <p style="font-size:9px; color:var(--dim)">AVG LATENCY</p>
+                    <p id="stat-lat" style="font-weight:800">0.0s</p>
                 </div>
             </div>
-            <div id="weaknessAlert" style="font-size:12px; background:#221111; padding:10px; border-radius:8px; color:var(--err); margin-bottom:15px; border:1px solid #442222;" class="hide">
-                <strong>Attention:</strong> Your speed drops on multiplications involving 7s and 8s. Focus on these.
-            </div>
-            <button class="btn btn-primary" onclick="showMenu()">Continue</button>
         </div>
+        <button class="btn btn-p" onclick="startDrill('optiver')">OPTIVER 80/8</button>
+        <button class="btn btn-s" onclick="switchTab('practice')">PRACTICE LAB</button>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div id="screen-analytics" class="screen hide">
+        <h2 style="margin-bottom:15px">PERFORMANCE DEEP-DIVE</h2>
+        
+        <div class="card">
+            <p style="font-size:10px; color:var(--dim); margin-bottom:10px">LATENCY BY OPERATION (SECONDS)</p>
+            <div id="latency-bars">
+                <!-- Bars injected here -->
+            </div>
+        </div>
+
+        <div class="card">
+            <p style="font-size:10px; color:var(--dim); margin-bottom:10px">ACCURACY HEATMAP</p>
+            <div id="heatmap" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px"></div>
+        </div>
+
+        <button class="btn btn-s" style="color:var(--err)" onclick="resetData()">WIPE DATA</button>
+    </div>
+
+    <!-- PRACTICE -->
+    <div id="screen-practice" class="screen hide">
+        <h2>PRACTICE LAB</h2>
+        <p style="font-size:11px; color:var(--dim); margin: 10px 0;">TARGET SPECIFIC WEAKNESSES</p>
+        
+        <div id="op-toggles" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px">
+            <!-- Toggles injected here -->
+        </div>
+
+        <button class="btn btn-p" onclick="startDrill('custom')">START SESSION</button>
+        <button class="btn btn-s" onclick="startDrill('weakness')" style="border:1px solid var(--blue); color:var(--blue)">DRILL SLOWEST OPS</button>
+    </div>
+
+    <!-- GAME -->
+    <div id="screen-game" class="screen hide" style="padding:0">
+        <div style="padding:20px">
+            <div style="display:flex; justify-content:space-between; align-items:center">
+                <p id="timer" style="font-weight:800; color:var(--acc)">8:00</p>
+                <p id="score" style="font-weight:800">0</p>
+            </div>
+            <div class="q-text" id="q-text">--</div>
+            <div class="a-input" id="a-input"></div>
+        </div>
+        <div class="numpad">
+            <div class="key" onclick="press('1')">1</div><div class="key" onclick="press('2')">2</div><div class="key" onclick="press('3')">3</div>
+            <div class="key" onclick="press('4')">4</div><div class="key" onclick="press('5')">5</div><div class="key" onclick="press('6')">6</div>
+            <div class="key" onclick="press('7')">7</div><div class="key" onclick="press('8')">8</div><div class="key" onclick="press('9')">9</div>
+            <div class="key" onclick="press('.')">.</div><div class="key" onclick="press('0')">0</div><div class="key" onclick="press('DEL')">DEL</div>
+            <div class="key ent" onclick="press('ENT')">SUBMIT</div>
+        </div>
+    </div>
+
+    <div class="nav" id="main-nav">
+        <div class="nav-item active" onclick="switchTab('home')">DASHBOARD</div>
+        <div class="nav-item" onclick="switchTab('analytics')">ANALYTICS</div>
+        <div class="nav-item" onclick="switchTab('practice')">PRACTICE</div>
     </div>
 </div>
 
 <script>
 "use strict";
 
-// --- Configuration & Weakness Engine ---
-let stats = JSON.parse(localStorage.getItem('qd-stats')) || { solved: 0, history: [], weaknesses: {} };
-let game = { mode: 'standard', timer: null, timeLeft: 0, score: 0, streak: 0, qCount: 0, currentQ: null, input: "" };
-
-const saveStats = () => localStorage.setItem('qd-stats', JSON.stringify(stats));
-
-// --- Math Engine (Quant Focused) ---
-function generateQuantProblem() {
-    const types = ['arith', 'arith', 'arith', 'estimation', 'percentage', 'square'];
-    const type = types[Math.floor(Math.random() * types.length)];
-    
-    // Adaptive logic: If user is weak in multiplication, increase chance
-    let a, b, answer, text, isEst = false;
-
-    switch(type) {
-        case 'arith':
-            const ops = ['+', '-', '×', '÷'];
-            const op = ops[Math.floor(Math.random() * ops.length)];
-            if(op === '+') { a = rand(10, 99); b = rand(10, 99); answer = a + b; text = `${a}+${b}`; }
-            if(op === '-') { a = rand(20, 150); b = rand(10, a); answer = a - b; text = `${a}-${b}`; }
-            if(op === '×') { a = rand(2, 14); b = rand(2, 19); answer = a * b; text = `${a}×${b}`; }
-            if(op === '÷') { b = rand(2, 12); answer = rand(2, 15); a = b * answer; text = `${a}÷${b}`; }
-            break;
-        case 'estimation':
-            a = rand(11, 99); b = rand(11, 99);
-            answer = a * b; text = `${a}×${b}`; isEst = true;
-            break;
-        case 'percentage':
-            const p = [5, 10, 15, 20, 25, 50, 75];
-            a = p[Math.floor(Math.random() * p.length)];
-            b = rand(1, 20) * 20;
-            answer = (a / 100) * b; text = `${a}% of ${b}`;
-            break;
-        case 'square':
-            a = rand(2, 20); answer = a * a; text = `${a}²`;
-            break;
+// --- Data Model ---
+const INITIAL_STATS = {
+    totalSolved: 0,
+    history: [], // {ts, score, type}
+    ops: {
+        add: {c:0, t:0, totalMs: 0},
+        sub: {c:0, t:0, totalMs: 0},
+        mul: {c:0, t:0, totalMs: 0},
+        div: {c:0, t:0, totalMs: 0},
+        pct: {c:0, t:0, totalMs: 0},
+        sq:  {c:0, t:0, totalMs: 0}
     }
-    return { text, answer, isEst };
+};
+
+let stats = JSON.parse(localStorage.getItem('qd_pro_v4')) || INITIAL_STATS;
+let activeOps = ['add', 'sub', 'mul', 'div'];
+let game = { active: false, timer: null, currentProb: null };
+
+const save = () => localStorage.setItem('qd_pro_v4', JSON.stringify(stats));
+
+// --- Math Engine ---
+function generateProblem() {
+    let opPool = activeOps;
+    
+    // If in weakness drill, only pick from ops with latency > 3s or accuracy < 80%
+    if (game.type === 'weakness') {
+        opPool = Object.keys(stats.ops).filter(o => {
+            const avg = stats.ops[o].t ? (stats.ops[o].totalMs / stats.ops[o].t) / 1000 : 0;
+            return avg > 2.5 || (stats.ops[o].t > 0 && stats.ops[o].c / stats.ops[o].t < 0.85);
+        });
+        if (opPool.length === 0) opPool = activeOps;
+    }
+
+    const op = opPool[Math.floor(Math.random() * opPool.length)];
+    let a, b, ans, txt;
+
+    switch(op) {
+        case 'add': a=rand(10,99); b=rand(10,99); ans=a+b; txt=`${a}+${b}`; break;
+        case 'sub': a=rand(20,150); b=rand(10,a); ans=a-b; txt=`${a}-${b}`; break;
+        case 'mul': a=rand(2,16); b=rand(2,20); ans=a*b; txt=`${a}×${b}`; break;
+        case 'div': b=rand(2,12); ans=rand(2,15); a=b*ans; txt=`${a}÷${b}`; break;
+        case 'pct': a=[5,10,15,20,25,50][Math.floor(Math.random()*6)]; b=rand(1,20)*20; ans=(a/100)*b; txt=`${a}% of ${b}`; break;
+        case 'sq': a=rand(2,25); ans=a*a; txt=`${a}²`; break;
+    }
+    return { op, txt, ans, start: Date.now() };
 }
 
-function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-// --- Game Logic ---
-function initGame(mode) {
-    game.mode = mode;
-    game.score = 0;
-    game.streak = 0;
-    game.qCount = 0;
-    game.timeLeft = mode === 'optiver' ? 480 : 120;
-    game.input = "";
-    
+// --- UI Logic ---
+function switchTab(tab) {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hide'));
-    document.getElementById('gameScreen').classList.remove('hide');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(`screen-${tab}`).classList.remove('hide');
+    event?.target.classList?.add('active');
     
-    nextQuestion();
-    startTimer();
+    if (tab === 'home') renderHome();
+    if (tab === 'analytics') renderAnalytics();
+    if (tab === 'practice') renderPractice();
 }
 
-function startTimer() {
-    clearInterval(game.timer);
+function renderHome() {
+    const solved = Object.values(stats.ops).reduce((a,b) => a + b.c, 0);
+    const totalMs = Object.values(stats.ops).reduce((a,b) => a + b.totalMs, 0);
+    const avgLat = solved ? (totalMs / solved / 1000).toFixed(2) : "0.00";
+    
+    document.getElementById('stat-solved').innerText = solved;
+    document.getElementById('stat-lat').innerText = avgLat + "s";
+    
+    let rank = "TRAINEE";
+    if (solved > 50) rank = "JUNIOR TRADER";
+    if (solved > 250 && avgLat < 2.5) rank = "ASSOCIATE TRADER";
+    if (solved > 700 && avgLat < 1.8) rank = "MARKET MAKER";
+    document.getElementById('rank-display').innerText = rank;
+}
+
+function renderAnalytics() {
+    const container = document.getElementById('latency-bars');
+    const heatmap = document.getElementById('heatmap');
+    container.innerHTML = ""; heatmap.innerHTML = "";
+
+    Object.entries(stats.ops).forEach(([name, data]) => {
+        const avg = data.t ? (data.totalMs / data.t / 1000) : 0;
+        const acc = data.t ? (data.c / data.t) : 0;
+
+        // Latency Bars
+        const width = Math.min(avg * 20, 100); // Scale 5 seconds to 100%
+        container.innerHTML += `
+            <div class="lat-bar-container">
+                <div class="lat-label">${name}</div>
+                <div class="lat-bar-bg"><div class="lat-bar-fill" style="width:${width}%; background:${avg > 3 ? 'var(--err)' : 'var(--blue)'}"></div></div>
+                <div class="lat-val">${avg.toFixed(2)}s</div>
+            </div>`;
+        
+        // Heatmap
+        const color = data.t === 0 ? '#111' : acc > 0.9 ? 'var(--suc)' : acc > 0.7 ? 'var(--acc)' : 'var(--err)';
+        heatmap.innerHTML += `<div style="background:${color}; padding:10px; border-radius:8px; text-align:center; font-size:10px; color:#000; font-weight:800">${name.toUpperCase()}<br>${Math.round(acc*100)}%</div>`;
+    });
+}
+
+function renderPractice() {
+    const grid = document.getElementById('op-toggles');
+    grid.innerHTML = "";
+    Object.keys(INITIAL_STATS.ops).forEach(op => {
+        const isOn = activeOps.includes(op);
+        grid.innerHTML += `<div class="btn-s ${isOn?'':'hide-op'}" style="padding:15px; border:1px solid ${isOn?'var(--acc)':'#222'}" onclick="toggleOp('${op}')">${op.toUpperCase()}</div>`;
+    });
+}
+
+function toggleOp(op) {
+    if (activeOps.includes(op)) activeOps = activeOps.filter(o => o !== op);
+    else activeOps.push(op);
+    renderPractice();
+}
+
+// --- Game Loop ---
+function startDrill(type) {
+    game = { active: true, type, score: 0, timeLeft: type === 'optiver' ? 480 : 120 };
+    document.getElementById('screen-game').classList.remove('hide');
+    document.getElementById('main-nav').classList.add('hide');
+    nextQ();
+    
     game.timer = setInterval(() => {
         game.timeLeft--;
-        updateHUD();
-        if(game.timeLeft <= 0) endDrill();
+        const m = Math.floor(game.timeLeft / 60);
+        const s = game.timeLeft % 60;
+        document.getElementById('timer').innerText = `${m}:${s.toString().padStart(2, '0')}`;
+        if (game.timeLeft <= 0) endGame();
     }, 1000);
 }
 
-function nextQuestion() {
-    game.currentQ = generateQuantProblem();
-    game.input = "";
-    document.getElementById('qText').innerText = game.currentQ.text;
-    document.getElementById('aInput').innerText = "";
-    document.getElementById('estMode').classList.toggle('hide', !game.currentQ.isEst);
+function nextQ() {
+    game.currentProb = generateProblem();
+    document.getElementById('q-text').innerText = game.currentProb.txt;
+    document.getElementById('a-input').innerText = "";
+    document.getElementById('score').innerText = game.score;
 }
 
-function handleInput(key) {
-    const display = document.getElementById('aInput');
-    if(key === 'DEL') game.input = game.input.slice(0, -1);
-    else if(key === 'ENT') validate();
-    else if(game.input.length < 8) game.input += key;
-    display.innerText = game.input;
+function press(key) {
+    const div = document.getElementById('a-input');
+    if (key === 'DEL') div.innerText = div.innerText.slice(0, -1);
+    else if (key === 'ENT') submit();
+    else if (div.innerText.length < 8) div.innerText += key;
 }
 
-function validate() {
-    const userVal = parseFloat(game.input);
-    const actual = game.currentQ.answer;
-    let correct = false;
+function submit() {
+    const val = parseFloat(document.getElementById('a-input').innerText);
+    const correct = Math.abs(val - game.currentProb.ans) < 0.01;
+    const latency = Date.now() - game.currentProb.start;
 
-    if(game.currentQ.isEst) {
-        const margin = actual * 0.05;
-        if(Math.abs(userVal - actual) <= margin) correct = true;
+    // Update Global Stats
+    const op = game.currentProb.op;
+    stats.ops[op].t++;
+    if (correct) {
+        stats.ops[op].c++;
+        stats.ops[op].totalMs += latency;
+        game.score++;
+        nextQ();
     } else {
-        if(Math.abs(userVal - actual) < 0.01) correct = true;
-    }
-
-    if(correct) {
-        game.score += 1;
-        game.streak++;
-        stats.solved++;
-        nextQuestion();
-    } else {
-        if(game.mode === 'optiver') {
-            game.score -= 2;
-            nextQuestion();
-        } else {
-            const el = document.getElementById('aInput');
-            el.classList.add('wrong');
-            setTimeout(() => { el.classList.remove('wrong'); game.input = ""; el.innerText = ""; }, 300);
-            game.streak = 0;
+        if (game.type === 'optiver') { game.score -= 2; nextQ(); }
+        else {
+            const input = document.getElementById('a-input');
+            input.classList.add('wrong');
+            setTimeout(() => { input.classList.remove('wrong'); input.innerText = ""; }, 200);
         }
     }
-    updateHUD();
+    save();
 }
 
-function updateHUD() {
-    const m = Math.floor(game.timeLeft / 60);
-    const s = game.timeLeft % 60;
-    document.getElementById('timer').innerText = `${m}:${s.toString().padStart(2, '0')}`;
-    document.getElementById('score').innerText = game.score;
-    document.getElementById('streak').innerText = game.streak;
-    document.getElementById('pBar').style.width = `${(game.score / 80) * 100}%`;
-}
-
-function endDrill() {
+function endGame() {
     clearInterval(game.timer);
-    document.getElementById('gameScreen').classList.add('hide');
-    document.getElementById('resultScreen').classList.remove('hide');
-    document.getElementById('finalScore').innerText = game.score;
-    saveStats();
+    stats.history.push({ score: game.score, type: game.type, ts: Date.now() });
+    save();
+    document.getElementById('screen-game').classList.add('hide');
+    document.getElementById('main-nav').classList.remove('hide');
+    switchTab('home');
 }
 
-function showMenu() {
-    document.getElementById('resultScreen').classList.add('hide');
-    document.getElementById('menuScreen').classList.remove('hide');
-    document.getElementById('totalSolved').innerText = stats.solved;
-    
-    // Rank logic
-    let rank = "Trainee";
-    if(stats.solved > 100) rank = "Junior Trader";
-    if(stats.solved > 500) rank = "Market Maker";
-    if(stats.solved > 1000) rank = "Legend";
-    document.getElementById('traderRank').innerText = rank;
-}
-
-function resetStats() {
-    if(confirm("Clear all data?")) {
-        stats = { solved: 0, history: [], weaknesses: {} };
-        saveStats();
-        showMenu();
+function resetData() {
+    if(confirm("Erase all progress?")) {
+        stats = INITIAL_STATS;
+        save();
+        location.reload();
     }
 }
 
-// Support Physical Keyboard
+// Global listeners
 window.addEventListener('keydown', e => {
-    if(e.key >= '0' && e.key <= '9') handleInput(e.key);
-    if(e.key === '.') handleInput('.');
-    if(e.key === '-') handleInput('-');
-    if(e.key === 'Enter') handleInput('ENT');
-    if(e.key === 'Backspace') handleInput('DEL');
+    if (e.key >= '0' && e.key <= '9' || e.key === '.') press(e.key);
+    if (e.key === 'Enter') press('ENT');
+    if (e.key === 'Backspace') press('DEL');
 });
 
 // Boot
-showMenu();
+renderHome();
 </script>
 </body>
 </html>
