@@ -3,486 +3,313 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>MathDrill Pro | Quant Trainer</title>
-<!-- PWA Meta -->
+<title>QuantDrill Elite</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0a0a">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a0a0a'/><text x='50' y='68' font-size='52' text-anchor='middle'>⚡</text></svg>">
-
-<!-- Firebase SDK (Optional but integrated) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
 
 :root {
-  --bg: #0a0a0a;
-  --s: #111;
-  --b: #1a1a1a;
-  --b2: #1f1f1f;
-  --t: #e4e4e7;
-  --m: #71717a;
+  --bg: #050505;
+  --card: #111111;
   --acc: #f97316;
-  --gold: #facc15;
-  --red: #ef4444;
-  --grn: #4ade80;
-  --cyan: #22d3ee;
-  --f: 'JetBrains Mono', monospace;
-  --st: env(safe-area-inset-top, 0px);
-  --sb: env(safe-area-inset-bottom, 0px);
+  --text: #ffffff;
+  --dim: #71717a;
+  --err: #ef4444;
+  --suc: #22c55e;
+  --font: 'JetBrains Mono', monospace;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-body {
-  background: var(--bg);
-  color: var(--t);
-  font-family: var(--f);
-  height: 100vh;
-  overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none;
+body { 
+    background: var(--bg); color: var(--text); font-family: var(--font); 
+    height: 100vh; overflow: hidden; display: flex; flex-direction: column;
 }
 
-#app {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  padding-top: var(--st);
+/* --- UI Architecture --- */
+#app { flex: 1; display: flex; flex-direction: column; padding-top: var(--safe-top); }
+
+.screen { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 20px; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.header { width: 100%; display: flex; justify-content: space-between; padding: 10px 20px; }
+.brand { font-size: 24px; font-weight: 800; letter-spacing: -1.5px; background: linear-gradient(to right, #facc15, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* --- Game Elements --- */
+.problem-box { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
+.q-text { font-size: 56px; font-weight: 800; text-align: center; margin-bottom: 10px; transition: transform 0.1s; }
+.a-input { font-size: 64px; color: var(--acc); font-weight: 700; min-height: 80px; border-bottom: 2px solid #222; min-width: 200px; text-align: center; }
+.a-input.wrong { color: var(--err); animation: shake 0.2s 2; }
+.est-tag { font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: 2px; margin-top: 10px; }
+
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+/* --- Numpad Elite --- */
+.numpad { 
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; 
+    background: #222; border-top: 1px solid #222; padding-bottom: var(--safe-bottom);
 }
-
-/* --- UI CARDS --- */
-.card {
-  width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  padding: 30px 20px;
-  animation: fadeIn 0.4s ease-out;
+.key { 
+    background: var(--bg); padding: 25px 0; font-size: 28px; font-weight: 600; 
+    display: flex; justify-content: center; align-items: center; cursor: pointer;
 }
+.key:active { background: #111; }
+.key.spec { color: var(--dim); font-size: 18px; }
+.key.enter { background: var(--acc); color: #000; font-weight: 800; grid-column: span 2; }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+/* --- Progress Tracking --- */
+.progress-container { width: 100%; height: 4px; background: #111; position: relative; }
+.progress-bar { height: 100%; background: var(--acc); transition: width 0.3s; }
+.streak-counter { font-size: 14px; font-weight: 700; color: var(--acc); }
 
-.brand-name {
-  font-size: 36px;
-  font-weight: 800;
-  letter-spacing: -2px;
-  background: linear-gradient(135deg, #facc15, #f97316, #ef4444);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+/* --- Menu & Stats --- */
+.menu-card { background: var(--card); border-radius: 20px; padding: 25px; width: 100%; max-width: 360px; margin-top: 20px; border: 1px solid #222; }
+.stat-row { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.btn { width: 100%; padding: 18px; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; font-family: var(--font); margin-top: 10px; }
+.btn-primary { background: var(--acc); color: #000; }
+.btn-outline { background: transparent; border: 1px solid #333; color: var(--text); }
 
-/* --- BUTTONS --- */
-.btn-p {
-  width: 100%;
-  padding: 18px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #facc15, #f97316);
-  color: var(--bg);
-  font-weight: 800;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-
-.btn-p:active { transform: scale(0.97); }
-
-.btn-optiver {
-  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-  color: #fff;
-}
-
-.btn-g {
-  background: var(--s);
-  border: 1px solid var(--b2);
-  color: var(--m);
-  padding: 14px;
-  border-radius: 12px;
-  width: 100%;
-  font-size: 14px;
-}
-
-/* --- GAME SCREEN --- */
-.game-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  padding: 20px;
-}
-
-.q-display {
-  font-size: 52px;
-  font-weight: 800;
-  margin-bottom: 5px;
-  text-align: center;
-  letter-spacing: -1px;
-}
-
-.a-display {
-  font-size: 56px;
-  min-height: 70px;
-  color: var(--acc);
-  font-weight: 700;
-  border-bottom: 4px solid var(--b2);
-  min-width: 200px;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.a-display.wrong {
-  color: var(--red);
-  animation: shake 0.2s ease-in-out 2;
-}
-
-@keyframes shake { 0%,100% { transform:translateX(0); } 25% { transform:translateX(-10px); } 75% { transform:translateX(10px); } }
-
-/* --- CUSTOM NUMPAD --- */
-.numpad {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--b);
-  border-top: 1px solid var(--b);
-  padding-bottom: var(--sb);
-}
-
-.num-btn {
-  background: var(--bg);
-  color: var(--t);
-  font-size: 28px;
-  font-weight: 600;
-  padding: 22px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.num-btn:active { background: var(--b); }
-
-.num-btn.action { background: #0f0f0f; color: var(--m); }
-
-.num-btn.enter { 
-  background: var(--acc); 
-  color: var(--bg); 
-  grid-column: span 2;
-  font-weight: 800;
-}
-
-/* --- HUD --- */
-.hud {
-  width: 100%;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.stat-label { font-size: 11px; color: var(--m); text-transform: uppercase; letter-spacing: 1px; }
-.stat-val { font-size: 24px; font-weight: 800; }
-.stat-val.urgent { color: var(--red); }
-
-/* --- RANKING --- */
-.rank-tag {
-  padding: 6px 16px;
-  border-radius: 30px;
-  font-size: 13px;
-  font-weight: 800;
-  text-transform: uppercase;
-  margin: 10px 0;
-}
-.rank-legendary { background: #7c3aed; color: #fff; box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
-.rank-senior { background: var(--gold); color: var(--bg); }
-.rank-junior { background: var(--cyan); color: var(--bg); }
-.rank-trainee { background: var(--b2); color: var(--m); }
+.badge { font-size: 10px; padding: 4px 8px; border-radius: 4px; font-weight: 800; }
+.badge-optiver { background: #1e40af; color: #fff; }
 
 .hide { display: none !important; }
 </style>
 </head>
 <body>
 
-<div id="app"></div>
+<div id="app">
+    <!-- Menu Screen -->
+    <div id="menuScreen" class="screen">
+        <div class="brand">QuantDrill Elite</div>
+        <div class="menu-card">
+            <div class="stat-row">
+                <div><p style="font-size:10px; color:var(--dim)">TOTAL SOLVED</p><p id="totalSolved" class="stat-val">0</p></div>
+                <div><p style="font-size:10px; color:var(--dim)">TRADER RANK</p><p id="traderRank" style="color:var(--acc)">Trainee</p></div>
+            </div>
+            <button class="btn btn-primary" onclick="initGame('standard')">Standard Drill (2m)</button>
+            <button class="btn btn-outline" onclick="initGame('optiver')">Optiver 80 in 8 <span class="badge badge-optiver">PRO</span></button>
+            <button class="btn btn-outline" style="margin-top:20px" onclick="resetStats()">Reset Analytics</button>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen hide">
+        <div class="progress-container"><div id="pBar" class="progress-bar"></div></div>
+        <div class="header">
+            <div><p class="stat-label">TIME</p><p id="timer" class="stat-val">--:--</p></div>
+            <div style="text-align:right"><p class="stat-label">STREAK</p><p id="streak" class="streak-counter">0</p></div>
+        </div>
+        
+        <div class="problem-box">
+            <div id="estMode" class="est-tag hide">Estimation (±5%)</div>
+            <div id="qText" class="q-text">--</div>
+            <div id="aInput" class="a-input"></div>
+        </div>
+
+        <div class="numpad" style="width:100%">
+            <div class="key" onclick="handleInput('1')">1</div>
+            <div class="key" onclick="handleInput('2')">2</div>
+            <div class="key" onclick="handleInput('3')">3</div>
+            <div class="key" onclick="handleInput('4')">4</div>
+            <div class="key" onclick="handleInput('5')">5</div>
+            <div class="key" onclick="handleInput('6')">6</div>
+            <div class="key" onclick="handleInput('7')">7</div>
+            <div class="key" onclick="handleInput('8')">8</div>
+            <div class="key" onclick="handleInput('9')">9</div>
+            <div class="key spec" onclick="handleInput('-')">-</div>
+            <div class="key" onclick="handleInput('0')">0</div>
+            <div class="key spec" onclick="handleInput('.')">.</div>
+            <div class="key spec" onclick="handleInput('DEL')">DEL</div>
+            <div class="key enter" onclick="handleInput('ENT')">SUBMIT</div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="resultScreen" class="screen hide">
+        <div class="brand">Drill Summary</div>
+        <div class="menu-card">
+            <div class="stat-row">
+                <div style="text-align:center; width:100%">
+                    <p style="font-size:12px; color:var(--dim)">FINAL SCORE</p>
+                    <p id="finalScore" style="font-size:64px; font-weight:800">0</p>
+                </div>
+            </div>
+            <div id="weaknessAlert" style="font-size:12px; background:#221111; padding:10px; border-radius:8px; color:var(--err); margin-bottom:15px; border:1px solid #442222;" class="hide">
+                <strong>Attention:</strong> Your speed drops on multiplications involving 7s and 8s. Focus on these.
+            </div>
+            <button class="btn btn-primary" onclick="showMenu()">Continue</button>
+        </div>
+    </div>
+</div>
 
 <script>
 "use strict";
 
-// --- Configuration & State ---
-const FIREBASE_CONFIG = { apiKey: "YOUR_KEY", projectId: "YOUR_ID" }; // Placeholder
-const FB_READY = FIREBASE_CONFIG.apiKey !== "YOUR_KEY";
+// --- Configuration & Weakness Engine ---
+let stats = JSON.parse(localStorage.getItem('qd-stats')) || { solved: 0, history: [], weaknesses: {} };
+let game = { mode: 'standard', timer: null, timeLeft: 0, score: 0, streak: 0, qCount: 0, currentQ: null, input: "" };
 
-const DEF_CFG = {
-  ops: { add:true, sub:true, mul:true, div:true, dec:true },
-  r: { addLo:2, addHi:100, subLo:2, subHi:100, mulLo:2, mulHi:12, divLo:2, divHi:12 }
-};
+const saveStats = () => localStorage.setItem('qd-stats', JSON.stringify(stats));
 
-let cfg = DEF_CFG;
-let hist = JSON.parse(localStorage.getItem("md-pro-v2-hist")) || [];
-let view = "menu"; // menu, game, results
-let mode = "standard"; // standard, optiver
-let problem = null;
-let input = "";
-let score = 0;
-let totalAttempted = 0;
-let timeLeft = 0;
-let questionsLeft = 0;
-let timerId = null;
+// --- Math Engine (Quant Focused) ---
+function generateQuantProblem() {
+    const types = ['arith', 'arith', 'arith', 'estimation', 'percentage', 'square'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    
+    // Adaptive logic: If user is weak in multiplication, increase chance
+    let a, b, answer, text, isEst = false;
 
-// --- Helper Functions ---
-const $ = id => document.getElementById(id);
-const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
-const pick = (arr) => arr[rand(0, arr.length - 1)];
-
-function getRank(spm, accuracy) {
-  const rating = spm * (accuracy / 100);
-  if (rating > 55) return { name: "Market Maker Legend", class: "rank-legendary" };
-  if (rating > 38) return { name: "Senior Trader", class: "rank-senior" };
-  if (rating > 22) return { name: "Junior Trader", class: "rank-junior" };
-  return { name: "Trainee Researcher", class: "rank-trainee" };
+    switch(type) {
+        case 'arith':
+            const ops = ['+', '-', '×', '÷'];
+            const op = ops[Math.floor(Math.random() * ops.length)];
+            if(op === '+') { a = rand(10, 99); b = rand(10, 99); answer = a + b; text = `${a}+${b}`; }
+            if(op === '-') { a = rand(20, 150); b = rand(10, a); answer = a - b; text = `${a}-${b}`; }
+            if(op === '×') { a = rand(2, 14); b = rand(2, 19); answer = a * b; text = `${a}×${b}`; }
+            if(op === '÷') { b = rand(2, 12); answer = rand(2, 15); a = b * answer; text = `${a}÷${b}`; }
+            break;
+        case 'estimation':
+            a = rand(11, 99); b = rand(11, 99);
+            answer = a * b; text = `${a}×${b}`; isEst = true;
+            break;
+        case 'percentage':
+            const p = [5, 10, 15, 20, 25, 50, 75];
+            a = p[Math.floor(Math.random() * p.length)];
+            b = rand(1, 20) * 20;
+            answer = (a / 100) * b; text = `${a}% of ${b}`;
+            break;
+        case 'square':
+            a = rand(2, 20); answer = a * a; text = `${a}²`;
+            break;
+    }
+    return { text, answer, isEst };
 }
 
-// --- Math Engine ---
-function generateProblem() {
-  const pool = Object.keys(cfg.ops).filter(k => cfg.ops[k]);
-  const op = pick(pool);
-  let a, b, answer, text;
-
-  switch(op) {
-    case "add": a=rand(cfg.r.addLo, cfg.r.addHi); b=rand(cfg.r.addLo, cfg.r.addHi); text=`${a} + ${b}`; answer=a+b; break;
-    case "sub": a=rand(cfg.r.subLo, cfg.r.subHi); b=rand(cfg.r.subLo, a); text=`${a} - ${b}`; answer=a-b; break;
-    case "mul": a=rand(cfg.r.mulLo, cfg.r.mulHi); b=rand(cfg.r.mulLo, cfg.r.mulHi); text=`${a} × ${b}`; answer=a*b; break;
-    case "div": b=rand(Math.max(2, cfg.r.divLo), cfg.r.divHi); answer=rand(cfg.r.divLo, cfg.r.divHi); a=b*answer; text=`${a} ÷ ${b}`; break;
-    case "dec": 
-      const sub = Math.random() > 0.5;
-      a = rand(11, 99) / 10; b = rand(11, 99) / 10;
-      if (sub && b > a) [a, b] = [b, a];
-      text = sub ? `${a} - ${b}` : `${a} + ${b}`;
-      answer = sub ? a - b : a + b;
-      answer = Math.round(answer * 10) / 10;
-      break;
-  }
-  return { text, answer };
-}
-
-// --- Views ---
-function render() {
-  const app = $("app");
-  if (view === "menu") {
-    const last = hist[hist.length-1];
-    app.innerHTML = `
-      <div class="card">
-        <div class="brand-name">MathDrill Pro</div>
-        <p style="color:var(--m); font-size:12px; margin-top:-10px">Quant Strategy & Mental Math</p>
-        
-        <div style="width:100%; margin: 10px 0;">
-          <button class="btn-p" onclick="startGame('standard')">Standard Drill (2m)</button>
-          <button class="btn-p btn-optiver" style="margin-top:10px" onclick="startGame('optiver')">Optiver: 80 in 8</button>
-        </div>
-
-        <div class="btn-g" style="text-align:center">
-          <p class="stat-label">Last Performance</p>
-          <p style="font-size:20px; font-weight:800; color:var(--t)">${last ? last.score : 0} <span style="font-size:12px; color:var(--m)">pts</span></p>
-        </div>
-
-        <div style="font-size:10px; color:var(--dm); margin-top:20px">v2.0 Beta • Integrated Numpad Enabled</div>
-      </div>
-    `;
-  } 
-  else if (view === "game") {
-    app.innerHTML = `
-      <div class="hud">
-        <div class="stat-box">
-          <p class="stat-label">Time</p>
-          <p class="stat-val" id="timer">--:--</p>
-        </div>
-        <div class="stat-box" style="text-align:right">
-          <p class="stat-label">${mode === 'optiver' ? 'Points' : 'Score'}</p>
-          <p class="stat-val" id="score">0</p>
-        </div>
-      </div>
-
-      <div class="game-container">
-        ${mode === 'optiver' ? `<p class="stat-label" style="margin-bottom:10px">${questionsLeft} Left</p>` : ''}
-        <div class="q-display">${problem.text}</div>
-        <div class="a-display" id="ans"></div>
-      </div>
-
-      <div class="numpad">
-        <div class="num-btn" onclick="uiInput('1')">1</div>
-        <div class="num-btn" onclick="uiInput('2')">2</div>
-        <div class="num-btn" onclick="uiInput('3')">3</div>
-        <div class="num-btn" onclick="uiInput('4')">4</div>
-        <div class="num-btn" onclick="uiInput('5')">5</div>
-        <div class="num-btn" onclick="uiInput('6')">6</div>
-        <div class="num-btn" onclick="uiInput('7')">7</div>
-        <div class="num-btn" onclick="uiInput('8')">8</div>
-        <div class="num-btn" onclick="uiInput('9')">9</div>
-        <div class="num-btn action" onclick="uiInput('-')">-</div>
-        <div class="num-btn" onclick="uiInput('0')">0</div>
-        <div class="num-btn action" onclick="uiInput('.')">.</div>
-        <div class="num-btn action" onclick="uiInput('DEL')">⌫</div>
-        <div class="num-btn enter" onclick="uiInput('ENT')">ENTER</div>
-      </div>
-    `;
-    updateHUD();
-  } 
-  else if (view === "results") {
-    const last = hist[hist.length-1];
-    const spm = (last.correct / (last.duration / 60)).toFixed(1);
-    const acc = Math.round((last.correct / last.total) * 100) || 0;
-    const rank = getRank(spm, acc);
-
-    app.innerHTML = `
-      <div class="card">
-        <p class="stat-label">Drill Complete</p>
-        <div class="brand-name" style="font-size:72px">${last.score}</div>
-        <div class="rank-tag ${rank.class}">${rank.name}</div>
-        
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; margin-top:10px">
-          <div class="btn-g" style="text-align:center"><span class="stat-label">Accuracy</span><br><span style="color:var(--t); font-weight:700">${acc}%</span></div>
-          <div class="btn-g" style="text-align:center"><span class="stat-label">Correct</span><br><span style="color:var(--t); font-weight:700">${last.correct}</span></div>
-        </div>
-
-        <button class="btn-p" style="margin-top:15px" onclick="view='menu';render()">Back to Menu</button>
-      </div>
-    `;
-  }
-}
+function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 
 // --- Game Logic ---
-function startGame(selectedMode) {
-  mode = selectedMode;
-  view = "game";
-  score = 0;
-  totalAttempted = 0;
-  timeLeft = mode === 'optiver' ? 480 : 120; // 8 mins vs 2 mins
-  questionsLeft = 80;
-  input = "";
-  problem = generateProblem();
-  render();
-
-  timerId = setInterval(() => {
-    timeLeft--;
-    if (timeLeft <= 0) endGame();
-    updateHUD();
-  }, 1000);
-}
-
-function uiInput(key) {
-  const display = $("ans");
-  if (!display) return;
-
-  if (key === 'DEL') {
-    input = input.slice(0, -1);
-  } else if (key === 'ENT') {
-    handleSubmission();
-    return;
-  } else {
-    if (input.length < 9) input += key;
-  }
-  display.innerText = input;
-}
-
-function handleSubmission() {
-  const userAns = parseFloat(input);
-  const isCorrect = Math.abs(userAns - problem.answer) < 0.01;
-  const display = $("ans");
-
-  totalAttempted++;
-  
-  if (isCorrect) {
-    score += 1;
-    if (mode === 'optiver') questionsLeft--;
+function initGame(mode) {
+    game.mode = mode;
+    game.score = 0;
+    game.streak = 0;
+    game.qCount = 0;
+    game.timeLeft = mode === 'optiver' ? 480 : 120;
+    game.input = "";
     
-    // Success feedback and next
-    input = "";
-    display.innerText = "";
-    problem = generateProblem();
-    if (mode === 'optiver' && questionsLeft <= 0) endGame();
-    render(); // Update question text
-  } else {
-    if (mode === 'optiver') {
-      score -= 2; // Optiver Penalty
-      questionsLeft--;
-      input = "";
-      display.innerText = "";
-      problem = generateProblem();
-      if (questionsLeft <= 0) endGame();
-      render();
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hide'));
+    document.getElementById('gameScreen').classList.remove('hide');
+    
+    nextQuestion();
+    startTimer();
+}
+
+function startTimer() {
+    clearInterval(game.timer);
+    game.timer = setInterval(() => {
+        game.timeLeft--;
+        updateHUD();
+        if(game.timeLeft <= 0) endDrill();
+    }, 1000);
+}
+
+function nextQuestion() {
+    game.currentQ = generateQuantProblem();
+    game.input = "";
+    document.getElementById('qText').innerText = game.currentQ.text;
+    document.getElementById('aInput').innerText = "";
+    document.getElementById('estMode').classList.toggle('hide', !game.currentQ.isEst);
+}
+
+function handleInput(key) {
+    const display = document.getElementById('aInput');
+    if(key === 'DEL') game.input = game.input.slice(0, -1);
+    else if(key === 'ENT') validate();
+    else if(game.input.length < 8) game.input += key;
+    display.innerText = game.input;
+}
+
+function validate() {
+    const userVal = parseFloat(game.input);
+    const actual = game.currentQ.answer;
+    let correct = false;
+
+    if(game.currentQ.isEst) {
+        const margin = actual * 0.05;
+        if(Math.abs(userVal - actual) <= margin) correct = true;
     } else {
-      display.classList.add("wrong");
-      setTimeout(() => {
-        display.classList.remove("wrong");
-        input = "";
-        display.innerText = "";
-      }, 300);
+        if(Math.abs(userVal - actual) < 0.01) correct = true;
     }
-  }
-  updateHUD();
+
+    if(correct) {
+        game.score += 1;
+        game.streak++;
+        stats.solved++;
+        nextQuestion();
+    } else {
+        if(game.mode === 'optiver') {
+            game.score -= 2;
+            nextQuestion();
+        } else {
+            const el = document.getElementById('aInput');
+            el.classList.add('wrong');
+            setTimeout(() => { el.classList.remove('wrong'); game.input = ""; el.innerText = ""; }, 300);
+            game.streak = 0;
+        }
+    }
+    updateHUD();
 }
 
 function updateHUD() {
-  const tEl = $("timer");
-  const sEl = $("score");
-  if (tEl) {
-    const m = Math.floor(timeLeft / 60);
-    const s = timeLeft % 60;
-    tEl.innerText = `${m}:${s.toString().padStart(2, '0')}`;
-    if (timeLeft <= 10) tEl.classList.add("urgent");
-  }
-  if (sEl) sEl.innerText = score;
+    const m = Math.floor(game.timeLeft / 60);
+    const s = game.timeLeft % 60;
+    document.getElementById('timer').innerText = `${m}:${s.toString().padStart(2, '0')}`;
+    document.getElementById('score').innerText = game.score;
+    document.getElementById('streak').innerText = game.streak;
+    document.getElementById('pBar').style.width = `${(game.score / 80) * 100}%`;
 }
 
-function endGame() {
-  clearInterval(timerId);
-  
-  // Calculate correct answers for history
-  let correctCount = 0;
-  if (mode === 'optiver') {
-    // Math: score = correct - 2*(total - correct) => score = 3*correct - 2*total
-    correctCount = Math.round((score + 2 * totalAttempted) / 3);
-  } else {
-    correctCount = score;
-  }
-
-  const session = {
-    score,
-    total: totalAttempted,
-    correct: correctCount,
-    duration: mode === 'optiver' ? 480 : 120,
-    mode: mode,
-    ts: Date.now()
-  };
-
-  hist.push(session);
-  localStorage.setItem("md-pro-v2-hist", JSON.stringify(hist));
-  
-  view = "results";
-  render();
+function endDrill() {
+    clearInterval(game.timer);
+    document.getElementById('gameScreen').classList.add('hide');
+    document.getElementById('resultScreen').classList.remove('hide');
+    document.getElementById('finalScore').innerText = game.score;
+    saveStats();
 }
 
-// Support for Desktop Keyboard
-window.addEventListener("keydown", (e) => {
-  if (view !== "game") return;
-  if (e.key >= "0" && e.key <= "9") uiInput(e.key);
-  if (e.key === ".") uiInput(".");
-  if (e.key === "-") uiInput("-");
-  if (e.key === "Backspace") uiInput("DEL");
-  if (e.key === "Enter") uiInput("ENT");
+function showMenu() {
+    document.getElementById('resultScreen').classList.add('hide');
+    document.getElementById('menuScreen').classList.remove('hide');
+    document.getElementById('totalSolved').innerText = stats.solved;
+    
+    // Rank logic
+    let rank = "Trainee";
+    if(stats.solved > 100) rank = "Junior Trader";
+    if(stats.solved > 500) rank = "Market Maker";
+    if(stats.solved > 1000) rank = "Legend";
+    document.getElementById('traderRank').innerText = rank;
+}
+
+function resetStats() {
+    if(confirm("Clear all data?")) {
+        stats = { solved: 0, history: [], weaknesses: {} };
+        saveStats();
+        showMenu();
+    }
+}
+
+// Support Physical Keyboard
+window.addEventListener('keydown', e => {
+    if(e.key >= '0' && e.key <= '9') handleInput(e.key);
+    if(e.key === '.') handleInput('.');
+    if(e.key === '-') handleInput('-');
+    if(e.key === 'Enter') handleInput('ENT');
+    if(e.key === 'Backspace') handleInput('DEL');
 });
 
-// Init
-render();
+// Boot
+showMenu();
 </script>
-
 </body>
 </html>
